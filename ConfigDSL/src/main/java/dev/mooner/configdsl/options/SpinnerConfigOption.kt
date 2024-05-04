@@ -32,6 +32,8 @@ data class SpinnerConfigOption(
     override val dependency   : String? = null,
 ): ConfigOption<SpinnerConfigOption.SpinnerViewHolder, Int>() {
 
+    override val hasError: Boolean = false
+
     override val default: Int
         get() = defaultIndex
 

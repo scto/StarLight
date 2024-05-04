@@ -29,6 +29,8 @@ data class ToggleConfigOption(
     override val dependency     : String? = null,
 ): ConfigOption<ToggleConfigOption.ToggleViewHolder, Boolean>() {
 
+    override val hasError: Boolean = false
+
     override fun onCreateViewHolder(parent: ViewGroup): ToggleViewHolder {
         val view = LayoutInflater
             .from(parent.context)

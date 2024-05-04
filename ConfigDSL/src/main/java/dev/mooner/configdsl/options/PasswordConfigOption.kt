@@ -31,6 +31,8 @@ data class PasswordConfigOption(
 ): ConfigOption<ButtonConfigOption.ButtonViewHolder, String>() {
 
     override val default: String = ""
+    override var hasError: Boolean = false
+        private set
 
     override fun onCreateViewHolder(parent: ViewGroup): ButtonConfigOption.ButtonViewHolder {
         val view = LayoutInflater
@@ -54,8 +56,10 @@ data class PasswordConfigOption(
                     val require = require(text.toString())
                     if (require != null) {
                         dialog.getInputField().error = require
+                        hasError = true
                         return@input
-                    }
+                    } else
+                        hasError = false
                 }.show {
                     setCommonAttrs()
                     title(text = title)

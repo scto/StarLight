@@ -26,6 +26,8 @@ data class ButtonConfigOption(
     override val dependency      : String? = null,
 ): ConfigOption<ButtonConfigOption.ButtonViewHolder, Boolean>() {
 
+    override val hasError: Boolean = false
+
     override val default: Boolean = false
 
     override fun onCreateViewHolder(parent: ViewGroup): ButtonViewHolder {

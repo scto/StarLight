@@ -120,6 +120,8 @@ abstract class ConfigOption<VH: BaseViewHolder, T: Any> {
     abstract val default: T
     abstract val dependency: String?
 
+    abstract val hasError: Boolean
+
     abstract fun onCreateViewHolder(parent: ViewGroup): VH
 
     abstract fun onDraw(holder: VH, data: T)
@@ -131,8 +133,6 @@ abstract class ConfigOption<VH: BaseViewHolder, T: Any> {
     abstract fun dataToJson(value: T): JsonElement
 
     abstract fun dataFromJson(jsonElement: JsonElement): T
-
-    var hasError: Boolean = false
 
     private var _eventFlow: MutableSharedFlow<EventData>? = null
 
@@ -154,6 +154,13 @@ abstract class ConfigOption<VH: BaseViewHolder, T: Any> {
         tryEmitData(EventData(
             provider = "dep:${id}",
             data     = value,
+            jsonData = JsonNull
+        ))
+
+    protected fun requestViewUpdate(): Boolean =
+        tryEmitData(EventData(
+            provider = "redraw:${id}",
+            data     = false,
             jsonData = JsonNull
         ))
 

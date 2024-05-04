@@ -30,6 +30,8 @@ data class SeekbarConfigOption(
     override val dependency   : String? = null,
 ): ConfigOption<SeekbarConfigOption.SeekbarViewHolder, Int>() {
 
+    override val hasError: Boolean = false
+
     override fun onCreateViewHolder(parent: ViewGroup): SeekbarViewHolder {
         val view = LayoutInflater
             .from(parent.context)

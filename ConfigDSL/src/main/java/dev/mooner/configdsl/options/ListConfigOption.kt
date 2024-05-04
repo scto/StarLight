@@ -45,6 +45,8 @@ data class ListConfigOption(
     override val dependency   : String? = null,
 ): ConfigOption<ListConfigOption.ListViewHolder, List<JsonObject>>() {
 
+    override val hasError: Boolean = false
+
     private var itemTouchCallback: ListRecyclerTouchCallback? = null
 
     override fun onCreateViewHolder(parent: ViewGroup): ListViewHolder {

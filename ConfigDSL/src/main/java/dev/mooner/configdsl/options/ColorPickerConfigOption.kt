@@ -37,6 +37,8 @@ data class ColorPickerConfigOption(
     override val dependency   : String? = null,
 ): ConfigOption<ButtonConfigOption.ButtonViewHolder, Int>() {
 
+    override val hasError: Boolean = false
+
     override fun onCreateViewHolder(parent: ViewGroup): ButtonConfigOption.ButtonViewHolder {
         val view = LayoutInflater
             .from(parent.context)

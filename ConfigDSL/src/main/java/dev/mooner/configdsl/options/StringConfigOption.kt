@@ -30,6 +30,9 @@ data class StringConfigOption(
     override val dependency   : String? = null,
 ): ConfigOption<StringConfigOption.StringViewHolder, String>() {
 
+    override var hasError: Boolean = false
+        private set
+
     override fun onCreateViewHolder(parent: ViewGroup): StringViewHolder {
         val view = LayoutInflater
             .from(parent.context)
