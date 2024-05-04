@@ -19,7 +19,7 @@ data class ChatRoomImpl(
     override val isDebugRoom: Boolean = false,
     val sendSession: Notification.Action,
     val readSession: Notification.Action,
-    private val context: Context
+    private val context: Context,
 ): ChatRoom {
 
     private var lastReceivedId: Long = 0

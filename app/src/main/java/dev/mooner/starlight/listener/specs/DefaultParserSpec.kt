@@ -68,8 +68,8 @@ class DefaultParserSpec: MessageParserSpec {
 
         val readAction = actions[0]
         val sendAction = actions[1]
-        val chatRoom: ChatRoom = chatRoomCache[userId]?.get(room) ?: let {
-            ChatRoomImpl(
+        val chatRoom: ChatRoom = chatRoomCache[userId]?.get(room)
+            ?: ChatRoomImpl(
                 id = roomId,
                 name = room,
                 isGroupChat = isGroupChat,
@@ -81,8 +81,6 @@ class DefaultParserSpec: MessageParserSpec {
                     chatRoomCache[userId] = hashMapOf()
                 chatRoomCache[userId]!![room] = nRoom
             }
-        }
-
         return Message(
             message = message,
             image = background,

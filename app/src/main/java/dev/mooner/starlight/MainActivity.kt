@@ -61,6 +61,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (currentTabId == R.id.nav_home)
             super.onBackPressed()

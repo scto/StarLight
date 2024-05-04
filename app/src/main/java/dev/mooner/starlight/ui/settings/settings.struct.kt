@@ -55,14 +55,14 @@ internal fun getSettingsStruct() = config {
                 description = "모든 프로젝트의 답장/처리 여부를 결정합니다."
                 icon = Icon.POWER
                 iconTintColor = color { "#7ACA8A" }
-                defaultValue = false
+                defaultValue = true
             }
             toggle {
                 id = "newbie_mode"
                 title = "쉬운 사용 모드"
                 description = "설정을 단순화하여 초심자도 사용이 쉽도록 변경합니다."
                 icon = Icon.ECO
-                defaultValue = true
+                defaultValue = false
                 setOnValueChangedListener { _, _ ->
                     showConfirmDialog(
                         requireActivity(),
@@ -413,7 +413,7 @@ private fun checkUpdate() {
 
     lifecycleScope.launch {
         val version = withContext(Dispatchers.IO) {
-            VersionChecker().fetchVersion(VersionChecker.Channel.SNAPSHOT)
+            VersionChecker().fetchVersion(VersionChecker.Channel.BETA)
         }
         if (version == null) {
             createSimplePeek(
@@ -488,7 +488,7 @@ private fun checkUpdate() {
                 autoHideMillis = null
             }.also(PeekAlert::peek)
 
-            downloadFileFromURL(requireContext(), version.downloadUrl, dest)
+            downloadFileFromURL(requireActivity(), version.downloadUrl, dest)
                 .onEach { (status, progress) ->
                     println("$status : ${progress}%")
                     if (status == DownloadManager.STATUS_SUCCESSFUL) {
@@ -514,7 +514,7 @@ private fun checkUpdate() {
     }
 }
 
-private fun downloadFileFromURL(context: Context, url: String, dest: File): StateFlow<Pair<Int, Int>> {
+private fun downloadFileFromURL(context: Activity, url: String, dest: File): StateFlow<Pair<Int, Int>> {
     val scope = CoroutineScope(Dispatchers.Default)
     val flow = MutableStateFlow(0 to -1)
 
@@ -538,10 +538,6 @@ private fun downloadFileFromURL(context: Context, url: String, dest: File): Stat
                         DownloadManager.STATUS_SUCCESSFUL,
                         DownloadManager.STATUS_FAILED -> {
                             flow.emit(status to -1)
-                            downloadManager.openDownloadedFile(downloadId).use {
-
-                            }
-                            println(downloadManager.getUriForDownloadedFile(downloadId))
                             broken = true
                             return@use
                         }

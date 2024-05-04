@@ -21,7 +21,7 @@ import dev.mooner.peekalert.PeekAlert
 import dev.mooner.starlight.PACKAGE_KAKAO_TALK
 import dev.mooner.starlight.R
 import dev.mooner.starlight.databinding.ActivityNotificationRulesBinding
-import dev.mooner.starlight.databinding.ConfigButtonFlatBinding
+import dev.mooner.starlight.databinding.CardSimpleListItemBinding
 import dev.mooner.starlight.listener.NotificationListener
 import dev.mooner.starlight.plugincore.chat.ParserSpecManager
 import dev.mooner.starlight.plugincore.config.GlobalConfig
@@ -199,16 +199,16 @@ class NotificationRulesActivity : AppCompatActivity() {
                     onInflate { view ->
                         LayoutInflater
                             .from(view.context)
-                            .inflate(R.layout.config_button_card, view as FrameLayout, true)
+                            .inflate(R.layout.card_simple_list_item, view as FrameLayout, true)
                     }
                     onDraw { view, data ->
                         val binding = view
-                            .findViewById<ConstraintLayout>(R.id.layout_configButton)
-                            .let(ConfigButtonFlatBinding::bind)
+                            .findViewById<ConstraintLayout>(R.id.layout_simple_list_item)
+                            .let(CardSimpleListItemBinding::bind)
 
                         binding.title.text = data["package_name"]!!.jsonPrimitive.content
                         binding.description.text = "유저 ID: ${data["user_id"]?.jsonPrimitive?.int ?: 0}"
-                        binding.icon.visibility = View.INVISIBLE
+                        binding.icon.visibility = View.GONE
                     }
                 }
             }

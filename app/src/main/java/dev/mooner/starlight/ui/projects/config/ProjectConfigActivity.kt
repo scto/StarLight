@@ -29,7 +29,7 @@ import dev.mooner.configdsl.options.*
 import dev.mooner.peekalert.PeekAlert
 import dev.mooner.starlight.R
 import dev.mooner.starlight.databinding.ActivityProjectConfigBinding
-import dev.mooner.starlight.databinding.ConfigButtonFlatBinding
+import dev.mooner.starlight.databinding.CardSimpleListItemBinding
 import dev.mooner.starlight.logging.bindLogNotifier
 import dev.mooner.starlight.plugincore.Session
 import dev.mooner.starlight.plugincore.Session.json
@@ -90,7 +90,7 @@ class ProjectConfigActivity: AppCompatActivity() {
                     project.getLanguage().onConfigChanged(id, data)
             }
             structure {
-                getConfigs(project)
+                getStruct(project)
             }
             @Suppress("UNCHECKED_CAST")
             configData((project.config.getData() as MutableDataMap).injectEventIds(project.info.allowedEventIds))
@@ -181,13 +181,26 @@ class ProjectConfigActivity: AppCompatActivity() {
         }
     }
 
-    private fun getConfigs(project: Project): ConfigStructure {
-        val configs = config {
+    private fun getStruct(project: Project): ConfigStructure {
+        return config {
             category {
                 id = "general"
                 title = "일반"
                 textColor = getColor(R.color.main_bright)
                 items {
+                    button {
+                        id = "folder_location"
+                        title = "프로젝트 위치"
+                        description = project.directory.path
+                        /*
+                        setOnClickListener { _ ->
+                            openFolderInExplorer(this@ProjectConfigActivity, project.directory)
+                        }
+                         */
+                        icon = Icon.FOLDER
+                        //backgroundColor = Color.parseColor("#B8DFD8")
+                        iconTintColor = color { "#93B5C6" }
+                    }
                     button {
                         id = "rename_project"
                         title = translate {
@@ -197,16 +210,6 @@ class ProjectConfigActivity: AppCompatActivity() {
                         icon = Icon.EDIT
                         //iconTintColor = color { "#94A684" }
                         setOnClickListener(::showProjectRenameDialog)
-                    }
-                    button {
-                        id = "open_folder"
-                        title = "폴더 열기"
-                        setOnClickListener { _ ->
-                            openFolderInExplorer(this@ProjectConfigActivity, project.directory)
-                        }
-                        icon = Icon.FOLDER
-                        //backgroundColor = Color.parseColor("#B8DFD8")
-                        iconTintColor = color { "#93B5C6" }
                     }
                     toggle {
                         id = "shutdown_on_error"
@@ -239,10 +242,10 @@ class ProjectConfigActivity: AppCompatActivity() {
                         onInflate { view ->
                             LayoutInflater
                                 .from(view.context)
-                                .inflate(R.layout.config_button_card, view as FrameLayout, true)
+                                .inflate(R.layout.card_simple_list_item, view as FrameLayout, true)
                         }
                         onDraw<ProjectEventIdData> { view, data ->
-                            val binding = ConfigButtonFlatBinding.bind(view.findViewById(R.id.layout_configButton))
+                            val binding = CardSimpleListItemBinding.bind(view.findViewById(R.id.layout_simple_list_item))
 
                             binding.title.text = data.id
                             binding.description.visibility = View.GONE
@@ -309,10 +312,10 @@ class ProjectConfigActivity: AppCompatActivity() {
                                     }
                                 }
                                 onInflate { view ->
-                                    LayoutInflater.from(view.context).inflate(R.layout.config_button_card, view as FrameLayout, true)
+                                    LayoutInflater.from(view.context).inflate(R.layout.card_simple_list_item, view as FrameLayout, true)
                                 }
                                 onDraw<ProjectButtonData> { view, data ->
-                                    val binding = ConfigButtonFlatBinding.bind(view.findViewById(R.id.layout_configButton))
+                                    val binding = CardSimpleListItemBinding.bind(view.findViewById(R.id.layout_simple_list_item))
 
                                     binding.title.text = data.id
                                     binding.description.visibility = View.GONE
@@ -415,7 +418,6 @@ class ProjectConfigActivity: AppCompatActivity() {
                 }
             }
         }
-        return configs
     }
 
     private fun showProjectRenameDialog() {
@@ -451,7 +453,7 @@ class ProjectConfigActivity: AppCompatActivity() {
                                     Locale.KOREAN  { "변경될 이름 입력..." }
                                 }
                                 require = lambda@{ v ->
-                                    if (v.isBlank()) {
+                                    if (v.isBlank() || !"(^[-_\\dA-Za-zㄱ-ㅎㅏ-ㅣ가-힣]+\$)".toRegex().matches(v)) {
                                         name = null
                                         return@lambda translate {
                                             Locale.ENGLISH { "Illegal name format" }

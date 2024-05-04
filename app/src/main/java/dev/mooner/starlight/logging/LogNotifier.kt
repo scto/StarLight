@@ -151,7 +151,7 @@ private fun Activity.createPeek(title: String, text: String): PeekAlert {
 
 private fun PeekAlertBuilder.setCommonAttrs() {
     autoHideMillis = 5000L
-    paddingDp = 17
+    paddingDp = 15
     position = PeekAlert.Position.Top
     width = LayoutParams.WRAP_CONTENT
     cornerRadius = dp(14).toFloat()

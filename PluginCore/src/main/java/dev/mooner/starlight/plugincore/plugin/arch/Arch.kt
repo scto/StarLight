@@ -19,7 +19,7 @@ enum class Arch(
 }
 
 fun getArch(): Arch =
-    System.getProperty("os.arch")?.let { getArchByName(it) } ?: Arch.UNKNOWN
+    System.getProperty("os.arch")?.let(::getArchByName) ?: Arch.UNKNOWN
 
 fun getArchByName(name: String): Arch =
-    Arch.values().firstOrNull { name in it.archNames } ?: Arch.UNKNOWN
+    Arch.entries.firstOrNull { name in it.archNames } ?: Arch.UNKNOWN

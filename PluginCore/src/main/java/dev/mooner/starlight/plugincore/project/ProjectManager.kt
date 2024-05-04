@@ -67,16 +67,9 @@ class ProjectManager(
             return
 
         val eventId = ProjectEventManager.validateAndGetEventID(eventClass)
-            ?: error("Unregistered event: ${eventClass.qualifiedName}")
+            ?: error("Non-registered event: ${eventClass.qualifiedName}")
 
         val event = eventClass.getInstance()
-        /*
-        if (eventId.count { it == '.' } == 0)
-            LoggerFactory
-                .logger("ProjectManager")
-                .warn { "Illegal ID format on $eventId: should have at least one separator(.)" }
-         */
-
         val actualTypes = event.argTypes
             .map { it.type }
         if (actualTypes.size < args.size)
@@ -93,14 +86,11 @@ class ProjectManager(
     }
 
     private fun fireEvent(eventId: String, functionName: String, args: Array<out Any>, onFailure: ProjectFailureCallback) {
-        projects.values
-            .filter { it.isCompiled && it.info.isEnabled && it.isEventCallAllowed(eventId) }
-            .let { availableProjects ->
-                if (availableProjects.isEmpty()) return
-                for (project in availableProjects) {
-                    project.callFunction(functionName, args) { e -> onFailure(project, e) }
-                }
-            }
+        for ((_, project) in projects) {
+            if (!project.isCompiled || !project.info.isEnabled || !project.isEventCallAllowed(eventId))
+                continue
+            project.callFunction(functionName, args) { e -> onFailure(project, e) }
+        }
     }
 
     fun removeProject(project: Project, removeFiles: Boolean = true) =

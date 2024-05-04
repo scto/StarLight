@@ -34,7 +34,6 @@ import dev.mooner.starlight.utils.LAYOUT_DEFAULT
 import dev.mooner.starlight.utils.LAYOUT_TABLET
 import dev.mooner.starlight.utils.layoutMode
 import jp.wasabeef.recyclerview.animators.FadeInUpAnimator
-import kotlinx.serialization.decodeFromString
 
 class HomeFragment : Fragment() {
 
@@ -108,11 +107,11 @@ class HomeFragment : Fragment() {
     }
 
     private fun getWidgets(): List<Widget> {
-        val widgetIds: List<String> = Session.json.decodeFromString(
+        val widgetIds: List<String> =
             GlobalConfig
                 .category(CA_WIDGETS)
                 .getString(CF_IDS, WIDGET_DEF_STRING)
-        )
+                .let(Session.json::decodeFromString)
         val widgets: MutableList<Widget> = mutableListOf()
 
         for (id in widgetIds) {

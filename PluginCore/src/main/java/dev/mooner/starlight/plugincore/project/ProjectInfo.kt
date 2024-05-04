@@ -5,20 +5,22 @@ import kotlinx.serialization.Serializable
 import java.util.*
 import kotlin.properties.Delegates.notNull
 
+typealias ProjectID = UUID
+
 @Serializable
 data class ProjectInfo (
     @Serializable(with = UUIDSerializer::class)
-    val id: UUID = UUID.randomUUID(),
-    val version: Int = 0,
-    val name: String,
-    val mainScript: String,
-    val languageId: String,
-    var isEnabled: Boolean,
-    var isPinned: Boolean = false,
-    val createdMillis: Long = System.currentTimeMillis(),
-    val allowedEventIds: MutableSet<String> =
+    val id              : ProjectID = UUID.randomUUID(),
+    val version         : Int = 0,
+    val name            : String,
+    val mainScript      : String,
+    val languageId      : String,
+    var isEnabled       : Boolean,
+    var isPinned        : Boolean = false,
+    val createdMillis   : Long = System.currentTimeMillis(),
+    val allowedEventIds : MutableSet<String> =
         hashSetOf("starlight.*"),
-    val packages: MutableSet<String> =
+    val packages        : MutableSet<String> =
         hashSetOf("com.kakao.talk")
 )
 

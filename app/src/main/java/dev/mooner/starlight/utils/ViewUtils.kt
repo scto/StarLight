@@ -85,13 +85,17 @@ var ProgressBar.graceProgress: Int
         setProgressGraceful(value)
     }
 
-private val Number.toPx get() = TypedValue.applyDimension(
-    TypedValue.COMPLEX_UNIT_DIP,
-    this.toFloat(),
-    Resources.getSystem().displayMetrics
-).toInt()
+private val Number.toPx
+    get() = TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP,
+        this.toFloat(),
+        Resources.getSystem().displayMetrics
+    )
 
-fun dp(value: Int): Int = value.toPx
+fun dp(value: Int): Int =
+    value.toPx.toInt()
+fun dp(value: Float): Float =
+    value.toPx
 
 inline fun View.applyLayoutParams(block: ViewGroup.LayoutParams.() -> Unit) {
     applyLayoutParams<ViewGroup.LayoutParams>(block)

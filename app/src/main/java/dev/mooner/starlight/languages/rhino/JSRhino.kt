@@ -38,8 +38,8 @@ class JSRhino: Language() {
     override val id: String = "JS_RHINO"
 
     override val name: String = translate {
-        Locale.ENGLISH { "JavaScript(Rhino)" }
-        Locale.KOREAN  { "자바스크립트(라이노)" }
+        Locale.ENGLISH { "JavaScript(RhinoJS)" }
+        Locale.KOREAN  { "자바스크립트(RhinoJS)" }
     }
 
     override val fileExtension: String = "js"

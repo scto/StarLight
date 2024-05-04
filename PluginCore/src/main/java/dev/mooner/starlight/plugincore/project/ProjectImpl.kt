@@ -119,19 +119,13 @@ class ProjectImpl private constructor(
         }
 
         CoroutineScope(mContext!!).launch {
-            try {
-                JobLocker.withLock(threadPoolName!!) {
-                    try {
-                        lang.callFunction(langScope!!, name, args)
-                    } catch (e: Error) {
-                        onError(e)
-                    }
-                }
-                if (isCompiled && lang.requireRelease)
-                    lang.release(langScope!!)
-            } catch (e: Error) {
-                onError(e)
+            JobLocker.withLock(threadPoolName!!) {
+                runCatching { lang.callFunction(langScope!!, name, args) }
+                    .onFailure(::onError)
             }
+            if (isCompiled && lang.requireRelease)
+                runCatching { lang.release(langScope!!) }
+                    .onFailure(::onError)
         }
     }
 

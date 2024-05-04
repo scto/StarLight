@@ -44,31 +44,24 @@ class LogItem: AbstractBindingItem<CardLogBinding>() {
         val context = binding.root.context
 
         binding.setViewByType(viewType)
+        val color = when(data.type) {
+            LogType.INFO     -> R.color.code_string
+            LogType.DEBUG    -> R.color.code_purple
+            LogType.WARN     -> R.color.code_yellow
+            LogType.ERROR    -> R.color.code_orange
+            LogType.CRITICAL -> R.color.code_error
+            LogType.VERBOSE  -> R.color.monokai_pro_sky
+        }.let(context::getColor)
         when(viewType) {
             ViewType.NORMAL -> {
-                val color = when(data.type) {
-                    LogType.INFO -> R.color.code_string
-                    LogType.DEBUG -> R.color.code_purple
-                    LogType.WARN -> R.color.code_yellow
-                    LogType.ERROR -> R.color.code_orange
-                    LogType.CRITICAL -> R.color.code_error
-                    LogType.VERBOSE -> R.color.monokai_pro_sky
-                }
-                binding.logInfoColor.setCardBackgroundColor(context.getColor(color))
+                //binding.logInfoColor.setCardBackgroundColor(context.getColor(color))
+                binding.logTitleText.setTextColor(color)
                 binding.logTitleText.text = data.tag ?: data.type.name
                 binding.logContentText.text = data.message
                 binding.logTimeStampText.text = formatDate(data.millis)
             }
             ViewType.TEXT -> {
-                val color = when(data.type) {
-                    LogType.INFO -> R.color.code_string
-                    LogType.DEBUG -> R.color.code_purple
-                    LogType.WARN -> R.color.code_yellow
-                    LogType.ERROR -> R.color.code_orange
-                    LogType.CRITICAL -> R.color.code_error
-                    LogType.VERBOSE -> R.color.monokai_pro_sky
-                }
-                binding.textModeStateIndicator.setBackgroundColor(context.getColor(color))
+                binding.textModeStateIndicator.setBackgroundColor(color)
                 binding.textModeMessage.text = data.toSimpleString()
             }
         }

@@ -118,6 +118,10 @@ class DebugRoomFragment: Fragment() {
             DebugRoomChatAdapter.CHAT_BOT
         addMessage(botName, msg, viewType, false)
     }
+    private val replier = Replier { _, msg, _ ->
+        onSend(msg)
+        true
+    }
     private val onMarkAsRead: () -> Unit = {
         Snackbar.make(binding.root, "읽음 처리 호출됨", Snackbar.LENGTH_SHORT).show()
     }
@@ -136,6 +140,7 @@ class DebugRoomFragment: Fragment() {
         fixedPadding = arguments?.getBoolean(ARG_FIXED_PAD)   ?: false
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -312,6 +317,7 @@ class DebugRoomFragment: Fragment() {
         }.show()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun addMessage(sender: String, msg: String, viewType: Int, clearInput: Boolean) {
         chatList += if (msg.length >= 500) {
             val fileName = UUID.randomUUID().toString() + ".chat"

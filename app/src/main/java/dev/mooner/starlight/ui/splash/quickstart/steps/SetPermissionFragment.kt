@@ -172,7 +172,7 @@ class SetPermissionFragment : Fragment() {
                 arrayOf(
                     INTERNET,
                     FOREGROUND_SERVICE,
-                    MANAGE_EXTERNAL_STORAGE
+                    MANAGE_EXTERNAL_STORAGE,
                 )
             }
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {

@@ -120,9 +120,9 @@ class GlobalApplication: Application(), LifecycleEventObserver {
                 }
                 LoggerFactory.logger("System").info {
                     """
-                            || Project ✦ StarLight |
-                            |Running PluginCore v${Info.PLUGINCORE_VERSION}
-                        """.trimMargin()
+                    || Project ✦ StarLight |
+                    |Running PluginCore v${Info.PLUGINCORE_VERSION}
+                    """.trimMargin()
                 }
             }
             .launchIn(CoroutineScope(Dispatchers.Default))
@@ -142,16 +142,15 @@ class GlobalApplication: Application(), LifecycleEventObserver {
 
     private fun checkStartupInfo(): StartupInfo? {
         val startupFile = File(getStarLightDirectory(), "STARTUP.info")
-        var startupData: StartupInfo? = null
         if (startupFile.exists() && startupFile.isFile) {
             try {
-                startupData = Session.json.decodeFromString(startupFile.readText())
+                return startupFile.readText()
             } catch (e: Exception) {
                 LOG.error { "Failed to open startup info: $e" }
                 startupFile.delete()
             }
         }
-        return startupData
+        return null
     }
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {

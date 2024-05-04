@@ -80,7 +80,7 @@ class ProjectEventSelectionAdapter(
                     else
                         context.getColor(R.color.main_bright)
                 } else
-                    context.getColor(R.color.background_chip)
+                    context.getColor(R.color.background_selection_card)
             )
             ivIcon.load(iconFile) {
                 scale(Scale.FIT)

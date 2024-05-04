@@ -6,7 +6,6 @@
 
 package dev.mooner.starlight.listener
 
-import android.content.Intent
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -89,10 +88,6 @@ class NotificationListener: NotificationListenerService() {
         LOG.debug { "Listener disconnected from system" }
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return super.onStartCommand(intent, flags, startId)
-    }
-
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         if (!isGlobalPowerOn || sbn.notification.actions == null || !ApplicationSession.isInitComplete) return
 
@@ -122,10 +117,6 @@ class NotificationListener: NotificationListenerService() {
 
         for (act in sbn.notification.actions) {
             if (act.remoteInputs != null && act.remoteInputs.isNotEmpty()) {
-                /*
-                if ( || sbn.packageName != PACKAGE_KAKAO_TALK)
-                    return
-                */
                 try {
                     val data = ParserSpecManager.getSpecById(appliedRule.parserSpecId)
                         ?.parse(userId, applicationContext, sbn, sbn.notification.actions)

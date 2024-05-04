@@ -20,12 +20,14 @@ class CategoryRecyclerAdapter(
     private val optionData : Map<String, JsonElement>,
     private val eventScope : CoroutineScope
 ): RecyclerView.Adapter<BaseViewHolder>() {
+
     private val eventPublisher = MutableSharedFlow<ConfigOption.EventData>(
         extraBufferCapacity = Channel.UNLIMITED)
     val eventFlow: SharedFlow<ConfigOption.EventData>
         get() = eventPublisher.asSharedFlow()
 
-    private val viewTypes: MutableList<Pair<ConfOptionClass, ConfigOption<*, *>>> = arrayListOf()
+    private val viewTypes: MutableList<Pair<ConfOptionClass, ConfigOption<*, *>>> =
+        arrayListOf()
 
     val hasError: Boolean
         get() = options.any(ConfigOption<*, *>::hasError)
