@@ -7,7 +7,7 @@ plugins {
 }
 
 def nightly = true
-def timeMillis = System.currentTimeMillis() + 2 // Invalidate cache
+def timeMillis = System.currentTimeMillis() + 1 // Invalidate cache
 
 android {
     compileSdk 33
@@ -17,7 +17,7 @@ android {
         applicationId "dev.mooner.starlight"
         minSdkVersion 24
         targetSdkVersion 33
-        versionCode 3
+        versionCode 4
         versionName "0.3.0a"
 
         resConfigs "en", "ko"
