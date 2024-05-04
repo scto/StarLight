@@ -127,6 +127,7 @@ object ApplicationSession {
                 addApi(NotificationApi())
                 addApi(EnvironmentApi())
                 addApi(JavaClassApi())
+            addApi(PlatformApi())
 
                 //Experimental Node.js Api implementation
                 addApi(EventEmitterApi())
