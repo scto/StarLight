@@ -207,6 +207,24 @@ fun Activity.createSimplePeek(title: String? = null, text: String, builder: Peek
     }
 }
 
+fun Fragment.createSuccessPeek(title: String, position: PeekAlert.Position): PeekAlert {
+    return createSimplePeek(text = title) {
+        this.position = position
+        iconRes = R.drawable.ic_round_check_24
+        iconTint(res = R.color.noctis_green)
+        backgroundColor(res = R.color.background_popup)
+    }
+}
+
+fun Activity.createSuccessPeek(title: String, position: PeekAlert.Position): PeekAlert {
+    return createSimplePeek(text = title) {
+        this.position = position
+        iconRes = R.drawable.ic_round_check_24
+        iconTint(res = R.color.noctis_green)
+        backgroundColor(res = R.color.background_popup)
+    }
+}
+
 private fun PeekAlertBuilder.setup(context: Context, title: String?, text: String) {
     position = PeekAlert.Position.Top
     width = ViewGroup.LayoutParams.WRAP_CONTENT

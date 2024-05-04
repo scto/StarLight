@@ -220,17 +220,10 @@ class ProjectListItem(
                 if (e == null) {
                     val compileTime = System.currentTimeMillis() - startMillis
                     withContext(Dispatchers.Main) {
-                        (parent.get() ?: return@withContext).createSimplePeek(
-                            text = translate {
-                                Locale.ENGLISH { "Successfully compiled ${project.info.name} (${compileTime}ms)" }
-                                Locale.KOREAN  { "${project.info.name} 컴파일 완료! (${compileTime}ms)" }
-                            }
-                        ) {
-                            position = PeekAlert.Position.Bottom
-                            iconRes = R.drawable.ic_round_check_24
-                            iconTint(res = R.color.noctis_green)
-                            backgroundColor(res = R.color.background_popup)
-                        }.peek()
+                        (parent.get() ?: return@withContext).createSuccessPeek(translate {
+                            Locale.ENGLISH { "Successfully compiled ${project.info.name} (${compileTime}ms)" }
+                            Locale.KOREAN  { "${project.info.name} 컴파일 완료! (${compileTime}ms)" }
+                        }, PeekAlert.Position.Bottom).peek()
                         binding?.updateState(project)
                     }
                 }
