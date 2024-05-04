@@ -117,17 +117,17 @@ object ApplicationSession {
                 registerSpec(AndroidRParserSpec())
             }
 
-            Session.apiManager.apply {
-                // Original Apis
-                addApi(LanguageManagerApi())
-                addApi(ProjectLoggerApi())
-                addApi(ProjectManagerApi())
-                addApi(PluginManagerApi())
-                //addApi(TimerApi())
-                addApi(NotificationApi())
-                addApi(EnvironmentApi())
-                addApi(JavaClassApi())
+        Session.apiManager.apply {
+            // Original Apis
+            addApi(LanguageManagerApi())
+            addApi(ProjectLoggerApi())
+            addApi(ProjectManagerApi())
+            addApi(PluginManagerApi())
+            //addApi(TimerApi())
+            addApi(NotificationApi())
+            addApi(EnvironmentApi())
             addApi(PlatformApi())
+            addApi(JavaClassApi())
 
                 //Experimental Node.js Api implementation
                 addApi(EventEmitterApi())
