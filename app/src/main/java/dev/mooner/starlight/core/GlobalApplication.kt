@@ -56,6 +56,7 @@ class GlobalApplication: Application(), LifecycleEventObserver {
         super.onCreate()
         //Logger.v(T, "Application onCreate() called")
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+        isStartupAborted = false // explicit reset
 
         mContext = applicationContext
 
