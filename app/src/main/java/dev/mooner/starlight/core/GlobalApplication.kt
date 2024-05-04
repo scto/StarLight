@@ -30,7 +30,6 @@ import dev.mooner.starlight.R
 import dev.mooner.starlight.event.ApplicationEvent
 import dev.mooner.starlight.logging.LogCollector
 import dev.mooner.starlight.plugincore.Info
-import dev.mooner.starlight.plugincore.Session
 import dev.mooner.starlight.plugincore.event.EventHandler
 import dev.mooner.starlight.plugincore.event.Events
 import dev.mooner.starlight.plugincore.event.on
@@ -47,14 +46,11 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import java.io.File
 
-private typealias StartupInfo = Map<String, String>
+private typealias StartupInfo = String
 
 private val LOG = LoggerFactory.logger {  }
 
 class GlobalApplication: Application(), LifecycleEventObserver {
-
-    private var mState: Int = STATE_UNDEFINED
-    val state get() = mState
 
     override fun onCreate() {
         super.onCreate()
@@ -100,9 +96,12 @@ class GlobalApplication: Application(), LifecycleEventObserver {
         if (!ForegroundTask.isRunning) {
             LOG.verbose { "Starting foreground task..." }
             val intent = Intent(this, ForegroundTask::class.java)
-            startForegroundService(intent)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
             LOG.info(R.string.log_foreground_started)
-            //Logger.i(T, "Successfully started foreground task!")
         }
 
         ApplicationSession.init(applicationContext)
@@ -174,6 +173,11 @@ class GlobalApplication: Application(), LifecycleEventObserver {
         const val STATE_UNDEFINED  = -1
         const val STATE_FOREGROUND = 0
         const val STATE_BACKGROUND = 1
+
+        private var mState: Int = STATE_UNDEFINED
+        val state get() = mState
+
+        internal var lastStageValue: String? = null
 
         @SuppressLint("StaticFieldLeak")
         @JvmStatic

@@ -9,7 +9,6 @@ package dev.mooner.starlight.core
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.os.Build
-import dev.mooner.configdsl.ConfigDSL
 import dev.mooner.starlight.CA_PLUGIN
 import dev.mooner.starlight.CF_SAFE_MODE
 import dev.mooner.starlight.R
@@ -34,12 +33,10 @@ import dev.mooner.starlight.plugincore.translation.Locale
 import dev.mooner.starlight.plugincore.utils.NetworkUtil
 import dev.mooner.starlight.plugincore.utils.getStarLightDirectory
 import dev.mooner.starlight.plugincore.version.Version
-import dev.mooner.starlight.ui.config.ParentConfigAdapterImpl
 import dev.mooner.starlight.ui.widget.*
 import dev.mooner.starlight.utils.getKakaoTalkVersion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
-import kotlinx.serialization.encodeToString
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -50,72 +47,69 @@ object ApplicationSession {
     var kakaoTalkVersion: Version? = null
         private set
 
-    private var mInitMillis: Long = 0L
-    val initMillis get() = mInitMillis
-
-    @JvmStatic
-    var initState: InitState = InitState.None
+    var initMillis: Long = 0L
         private set
 
-    val isInitComplete get() = initState == InitState.Done
+    @JvmStatic
+    var initState: Session.InitState = Session.InitState.None
+        private set
 
-    internal fun init(context: Context): Flow<String?> =
-        flow {
-            initState = InitState.Running
-            if (isInitComplete) {
-                logger.warn { "Rejecting re-init of ApplicationSession" }
-                initState = InitState.Done
-                emit(null)
-                return@flow
-            }
+    val isInitComplete
+        get() = initState == Session.InitState.Done
 
-            setExceptionHandler(context)
+    internal fun init(context: Context): Flow<String> = flow {
+        initState = Session.InitState.Processing
+        if (isInitComplete) {
+            logger.warn { "Rejecting re-init of ApplicationSession" }
+            initState = Session.InitState.Done
+            return@flow
+        }
 
-            emit(context.getString(R.string.step_check_kakaotalk_version))
-            context.getKakaoTalkVersion()?.let { version ->
-                if (Version.check(version))
-                    kakaoTalkVersion = Version.fromString(version)
-                else
-                    logger.error { "카카오톡 버전 파싱에 실패했어요. (버전: ${version})" }
-            }
-            logger.info { "카카오톡 버전: $kakaoTalkVersion" }
+        setExceptionHandler(context)
+        //ConfigDSL.registerAdapterImpl(::ParentConfigAdapterImpl)
 
-            emit(context.getString(R.string.step_plugincore_init))
+        emit(context.getString(R.string.step_check_kakaotalk_version))
+        context.getKakaoTalkVersion()?.let { version ->
+            if (Version.check(version))
+                kakaoTalkVersion = Version.fromString(version)
+            else
+                logger.error { "카카오톡 버전 파싱에 실패했어요. (버전: ${version})" }
+        }
+        logger.info { "카카오톡 버전: $kakaoTalkVersion" }
 
-            val locale = context.getString(R.string.locale_name)
-                .runCatching(Locale::valueOf)
-                .getOrNull() ?: Locale.ENGLISH
-            logger.debug { "Initializing with locale $locale" }
+        emit(context.getString(R.string.step_plugincore_init))
 
-            val pContext = Session.init(locale, getStarLightDirectory()) ?: return@flow
+        val locale = context.getString(R.string.locale_name)
+            .runCatching(Locale::valueOf)
+            .getOrNull() ?: Locale.ENGLISH
+        logger.debug { "Initializing with locale $locale" }
 
-            Session.languageManager.apply {
-                //addLanguage("", JSV8())
-                addLanguage(pContext, JSRhino())
-                //addLanguage(GraalVMLang())
-            }
+        val pContext = Session.init(locale, getStarLightDirectory()) ?: return@flow
 
-            if (!GlobalConfig.category(CA_PLUGIN).getBoolean(CF_SAFE_MODE, false)) {
-                Session.pluginLoader.loadPlugins(context)
-                    .flowOn(Dispatchers.Default)
-                    .onEach { value ->
-                        if (value is String)
-                            emit(context.getString(R.string.step_plugins).format(value))
-                    }
-                    .collect()
-            } else {
-                logger.info { "Skipping plugin load..." }
-            }
+        Session.languageManager.apply {
+            //addLanguage("", JSV8())
+            addLanguage(pContext, JSRhino())
+            //addLanguage(GraalVMLang())
+        }
 
-            emit(context.getString(R.string.step_default_lib))
-            //CorePlugin()
+        if (!GlobalConfig.category(CA_PLUGIN).getBoolean(CF_SAFE_MODE, false)) {
+            Session.pluginLoader.loadPlugins(context)
+                .flowOn(Dispatchers.Default)
+                .onEach { value ->
+                    if (value is String)
+                        emit(context.getString(R.string.step_plugins).format(value))
+                }
+                .collect()
+        } else {
+            logger.info { "Skipping plugin load..." }
+        }
 
-            ConfigDSL.registerAdapterImpl(::ParentConfigAdapterImpl)
+        emit(context.getString(R.string.step_default_lib))
 
-            ParserSpecManager.apply {
-                registerSpec(DefaultParserSpec())
-                registerSpec(AndroidRParserSpec())
-            }
+        ParserSpecManager.apply {
+            registerSpec(DefaultParserSpec())
+            registerSpec(AndroidRParserSpec())
+        }
 
         Session.apiManager.apply {
             // Original Apis
@@ -129,54 +123,54 @@ object ApplicationSession {
             addApi(PlatformApi())
             addApi(JavaClassApi())
 
-                //Experimental Node.js Api implementation
-                addApi(EventEmitterApi())
+            //Experimental Node.js Api implementation
+            addApi(EventEmitterApi())
 
-                // Legacy Apis
-                addApi(UtilsApi())
-                addApi(LegacyApi())
-                addApi(BridgeApi())
-                addApi(FileStreamApi())
-                addApi(DataBaseApi())
-                addApi(DeviceApi())
+            // Legacy Apis
+            addApi(UtilsApi())
+            addApi(LegacyApi())
+            addApi(BridgeApi())
+            addApi(FileStreamApi())
+            addApi(DataBaseApi())
+            addApi(DeviceApi())
 
-                // Api2 Apis
-                addApi(AppApi())
-                addApi(BroadcastApi())
-            }
-
-            Session.widgetManager.apply {
-                //val name = "기본 위젯"
-                addWidget(pContext, DummyWidgetSlim::class.java)
-                addWidget(pContext, UptimeWidgetDefault::class.java)
-                addWidget(pContext, UptimeWidgetSlim::class.java)
-                addWidget(pContext, LogsWidget::class.java)
-                addWidget(pContext, LogGenWidget::class.java)
-            }
-
-            registerProjectEvents(pContext) {
-                category("message") {
-                    add<ProjectOnMessageEvent>()
-                    add<ProjectOnMessageDeleteEvent>()
-                    add<LegacyEvent>()
-                }
-                category("notification") {
-                    add<OnNotificationPostedEvent>()
-                }
-                category("project") {
-                    add<ProjectOnStartCompileEvent>()
-                }
-            }
-
-            emit(context.getString(R.string.step_projects))
-            Session.projectLoader.loadProjects()
-
-            setNetworkHandler(context)
-
-            initState = InitState.Done
-            emit(null)
-            mInitMillis = System.currentTimeMillis()
+            // Api2 Apis
+            addApi(AppApi())
+            addApi(BroadcastApi())
         }
+
+        Session.widgetManager.apply {
+            //val name = "기본 위젯"
+            addWidget(pContext, DummyWidgetSlim::class.java)
+            addWidget(pContext, UptimeWidgetDefault::class.java)
+            addWidget(pContext, UptimeWidgetSlim::class.java)
+            addWidget(pContext, LogsWidget::class.java)
+            addWidget(pContext, LogGenWidget::class.java)
+            addWidget(pContext, DashboardWidget::class.java)
+        }
+
+        registerProjectEvents(pContext) {
+            category("message") {
+                add<ProjectOnMessageEvent>()
+                add<ProjectOnMessageDeleteEvent>()
+                add<LegacyEvent>()
+            }
+            category("notification") {
+                add<OnNotificationPostedEvent>()
+            }
+            category("project") {
+                add<ProjectOnStartCompileEvent>()
+            }
+        }
+
+        emit(context.getString(R.string.step_projects))
+        Session.projectLoader.loadProjects()
+
+        setNetworkHandler(context)
+
+        initState = Session.InitState.Done
+        initMillis = System.currentTimeMillis()
+    }
 
     internal fun shutdown() {
         try {
@@ -217,37 +211,29 @@ object ApplicationSession {
                 pInfo.versionCode
 
             val errMsg = """
-                *** 치명적인 오류가 발생했습니다. 앱을 종료하는 중... ***
-                [버그 제보시 아래 메세지를 첨부해주세요.]
-                ──────────
-                StarLight v${pInfo.versionName}(build ${versionCode})
-                PluginCore v${Info.PLUGINCORE_VERSION}
-                Build.VERSION.SDK_INT: ${Build.VERSION.SDK_INT}
-                Build.DEVICE: ${Build.DEVICE}
-                thread  : ${paramThread.name}
-                message : ${paramThrowable.localizedMessage}
-                cause   : ${paramThrowable.cause}
-                ┉┉┉┉┉┉┉┉┉┉
-                Stack Trace:
-                
-            """.trimIndent() + paramThrowable.stackTraceToString() + "\n──────────"
-            logger.wtf { errMsg }
+            |*** 치명적인 오류가 발생했습니다. 앱을 종료하는 중... ***
+            |[버그 제보시 아래 메세지를 첨부해주세요.]
+            |──────────
+            |StarLight v${pInfo.versionName}(build ${versionCode})
+            |PluginCore v${Info.PLUGINCORE_VERSION}
+            |Build.VERSION.SDK_INT: ${Build.VERSION.SDK_INT}
+            |Build.DEVICE: ${Build.DEVICE}
+            |thread  : ${paramThread.name}
+            |message : ${paramThrowable.localizedMessage}
+            |cause   : ${paramThrowable.cause}
+            |┉┉┉┉┉┉┉┉┉┉
+            |Stack Trace:
+            |
+            """.trimMargin() + paramThrowable.stackTraceToString() + "\n──────────"
 
-            val startupData = Session.json.encodeToString(mapOf("last_error" to errMsg))
             try {
-                File(getStarLightDirectory(), "STARTUP.info").writeText(startupData)
+                File(getStarLightDirectory(), "STARTUP.info").writeText(errMsg)
             } catch (e: Throwable) {
                 e.printStackTrace()
             } finally {
+                logger.wtf { errMsg }
                 shutdown()
                 exitProcess(2)
             }
         }
-
-    sealed class InitState {
-
-        data object None: InitState()
-        data object Running: InitState()
-        data object Done: InitState()
-    }
 }

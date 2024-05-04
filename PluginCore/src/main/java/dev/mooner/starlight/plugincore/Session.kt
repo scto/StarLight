@@ -26,16 +26,16 @@ import dev.mooner.starlight.plugincore.utils.getStarLightDirectory
 import dev.mooner.starlight.plugincore.widget.WidgetManager
 import kotlinx.serialization.json.Json
 import java.io.File
-import kotlin.properties.Delegates
+import kotlin.properties.Delegates.notNull
 
 object Session {
 
     @JvmStatic
-    private var isDuringInit = false
+    var state: InitState = InitState.None
+        private set
 
-    @JvmStatic
-    private var mIsInitComplete = false
-    val isInitComplete get() = mIsInitComplete
+    val isInitComplete
+        get() = state == InitState.Done
 
     val json: Json = Json {
         isLenient = true
@@ -47,27 +47,25 @@ object Session {
     val pluginLoader    : PluginLoader    = PluginLoader()
     val pluginManager   : PluginManager   = PluginManager()
     val widgetManager   : WidgetManager   = WidgetManager()
-    //val eventManager: EventHandler       = EventHandler()
 
-    private var mProjectLoader: ProjectLoader by Delegates.notNull()
-    private var mProjectManager: ProjectManager by Delegates.notNull()
-    val projectManager get() = mProjectManager
-    val projectLoader get() = mProjectLoader
+    var projectManager: ProjectManager by notNull()
+        private set
+    var projectLoader: ProjectLoader by notNull()
+        private set
 
-    private var mLibraryLoader: LibraryLoader? = null
-    private var mLibraryManager: LibraryManager? = null
-    private val libraryLoader: LibraryLoader? get() = mLibraryLoader
-    val libraryManager: LibraryManager? get() = mLibraryManager
+    private var libraryLoader: LibraryLoader? = null
+    var libraryManager: LibraryManager? = null
+        private set
 
-    private var mApiManager: ApiManager by Delegates.notNull()
-    val apiManager get() = mApiManager
+    var apiManager: ApiManager by notNull()
+        private set
 
     fun init(locale: Locale, baseDir: File): PluginContext? {
-        if (isInitComplete || isDuringInit) {
+        if (state != InitState.None) {
             Logger.w("Session", "Rejecting re-init of Session")
             return null
         }
-        isDuringInit = true
+        state = InitState.Processing
 
         val preStack = Thread.currentThread().stackTrace[2]
         if (!preStack.className.startsWith("dev.mooner.starlight")) {
@@ -77,18 +75,16 @@ object Session {
         TranslationManager.init(locale)
 
         val projectDir = File(baseDir, "projects/")
-
-        mProjectManager = ProjectManager(projectDir)
-        mProjectLoader = ProjectLoader(projectDir)
-        mApiManager = ApiManager()
+        projectManager = ProjectManager(projectDir)
+        projectLoader  = ProjectLoader(projectDir)
+        apiManager     = ApiManager()
 
         if (GlobalConfig.category("beta_features").getBoolean("load_external_dex_libs", false)) {
-            mLibraryLoader = LibraryLoader()
-            mLibraryManager = LibraryManager(libraryLoader!!.loadLibraries(baseDir).toMutableSet())
+            libraryLoader  = LibraryLoader()
+            libraryManager = LibraryManager(libraryLoader!!.loadLibraries(baseDir).toMutableSet())
             apiManager.addApi(LibraryManagerApi())
         }
-        isDuringInit = false
-        mIsInitComplete = true
+        state = InitState.Done
 
         return PluginContextImpl(
             "starlight",
@@ -113,5 +109,12 @@ object Session {
         pluginLoader.purge()
         pluginManager.purge()
         projectManager.purge()
+    }
+
+    sealed class InitState {
+
+        data object None       : InitState()
+        data object Processing : InitState()
+        data object Done       : InitState()
     }
 }
