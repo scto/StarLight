@@ -1,4 +1,10 @@
-package dev.mooner.starlight.ui.config
+/*
+ * CategoryRecyclerAdapter.kt created by Minki Moon(mooner1022) on 5/3/24, 5:48 PM
+ * Copyright (c) mooner1022. all rights reserved.
+ * This code is licensed under the GNU General Public License v3.0.
+ */
+
+package dev.mooner.configdsl.adapters
 
 import android.view.View
 import android.view.ViewGroup
@@ -7,10 +13,14 @@ import dev.mooner.configdsl.BaseViewHolder
 import dev.mooner.configdsl.ConfigOption
 import dev.mooner.configdsl.DefaultViewHolder
 import dev.mooner.configdsl.options.ToggleConfigOption
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.reflect.KClass
 
 private typealias ConfOptionClass = KClass<out ConfigOption<*, *>>
@@ -22,7 +32,8 @@ class CategoryRecyclerAdapter(
 ): RecyclerView.Adapter<BaseViewHolder>() {
 
     private val eventPublisher = MutableSharedFlow<ConfigOption.EventData>(
-        extraBufferCapacity = Channel.UNLIMITED)
+        extraBufferCapacity = Channel.UNLIMITED
+    )
     val eventFlow: SharedFlow<ConfigOption.EventData>
         get() = eventPublisher.asSharedFlow()
 
@@ -127,6 +138,20 @@ class CategoryRecyclerAdapter(
         }
         eventPublisher
             .onEach(::println)
+            .launchIn(eventScope)
+
+        eventPublisher
+            .buffer()
+            .filter { it.provider.startsWith("redraw:") }
+            .onEach { event ->
+                val originId = event.provider.drop("redraw:".length)
+                val index = options.indexOfFirst { it.id == originId }
+                if (index == -1)
+                    return@onEach
+
+                notifyItemChanged(index)
+            }
+            .flowOn(Dispatchers.Main)
             .launchIn(eventScope)
     }
 }

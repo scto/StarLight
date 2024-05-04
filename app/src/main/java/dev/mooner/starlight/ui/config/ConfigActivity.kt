@@ -27,7 +27,7 @@ class ConfigActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityConfigBinding
 
-    private var recyclerAdapter: ParentConfigAdapter<*>? = null
+    private var recyclerAdapter: ParentConfigAdapter? = null
     //private var bypassDestroy: Boolean = false
     lateinit var activityId: String
 
@@ -72,11 +72,11 @@ class ConfigActivity : AppCompatActivity() {
             return
         }
 
-        recyclerAdapter = ParentConfigAdapterImpl(
+        recyclerAdapter = ParentConfigAdapter(
             configStructure  = holder.struct,
             configData       = holder.saved,
             coroutineContext = lifecycleScope.coroutineContext
-        ).also(ParentConfigAdapterImpl::notifyAllItemInserted).apply {
+        ).also(ParentConfigAdapter::notifyAllItemInserted).apply {
             eventFlow
                 .onEach { data ->
                     val (parentId, id) = data.provider.split(":")

@@ -31,7 +31,7 @@ class PageConfigOption(
     override val default    : MutableDataMapEntry = hashMapOf(),
     val content: ConfigStructure,
     private val isRootOption: Boolean = false,
-): RootConfigOption<PageConfigOption.PageViewHolder, MutableDataMapEntry>() {
+): RootConfigOption<PageConfigOption.PageViewHolder, MutableDataMapEntry>(content) {
 
     override val dependency : String? = null
 
@@ -105,7 +105,7 @@ class PageConfigOption(
         if (id !in descCache)
             descCache[id] = content
                 .filterIsInstance<CategoryConfigOption>()
-                .map { it.items.map { item -> item.title } }
+                .map { it.childOptions.map { item -> item.title } }
                 .flatten()
                 .joinToString(", ")
         return descCache[id]!!

@@ -10,7 +10,7 @@ import dev.mooner.configdsl.adapters.ParentConfigAdapter
 import kotlinx.serialization.json.JsonElement
 import kotlin.coroutines.CoroutineContext
 
-internal typealias ParentAdapterInstanceBlock = (ConfigStructure, MutableDataMap, CoroutineContext) -> ParentConfigAdapter<*>
+internal typealias ParentAdapterInstanceBlock = (ConfigStructure, MutableDataMap, CoroutineContext) -> ParentConfigAdapter
 typealias DataMap        = Map<String, DataMapEntry>
 typealias MutableDataMap = MutableMap<String, MutableDataMapEntry>
 typealias DataMapEntry        = Map<String, JsonElement>
@@ -24,10 +24,16 @@ object ConfigDSL {
         this.createInstance = createInstance
     }
 
+    /*
     internal fun createParentAdapter(
         configStructure  : ConfigStructure,
         configData       : MutableDataMap,
         coroutineContext : CoroutineContext,
     ): ParentConfigAdapter<*> =
         this.createInstance(configStructure, configData, coroutineContext)
+     */
+
+    internal fun getIsDevMode(): Boolean {
+        return true
+    }
 }

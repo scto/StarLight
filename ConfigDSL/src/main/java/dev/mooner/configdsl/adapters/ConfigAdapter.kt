@@ -11,7 +11,10 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import dev.mooner.configdsl.*
+import dev.mooner.configdsl.ConfigBuilder
+import dev.mooner.configdsl.ConfigOption
+import dev.mooner.configdsl.ConfigStructure
+import dev.mooner.configdsl.MutableDataMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -24,14 +27,14 @@ typealias OnValueUpdatedListener = suspend (parentId: String, id: String, value:
 typealias StructBlock = () -> ConfigStructure
 
 class ConfigAdapter private constructor(
-    private var structBlock : StructBlock,
+    structBlock : StructBlock,
     private val configData  : MutableDataMap,
 ): DefaultLifecycleObserver {
 
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
-    private var parentAdapter: ParentConfigAdapter<*>? =
-        ConfigDSL.createParentAdapter(
+    private var parentAdapter: ParentConfigAdapter? =
+        ParentConfigAdapter(
             configStructure  = structBlock(),
             configData       = configData,
             coroutineContext = coroutineScope.coroutineContext

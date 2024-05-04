@@ -1,34 +1,103 @@
 /*
- * ParentConfigAdapter.kt created by Minki Moon(mooner1022) on 2/17/24, 6:03 PM
+ * ParentConfigAdapter.kt created by Minki Moon(mooner1022) on 5/3/24, 5:48 PM
  * Copyright (c) mooner1022. all rights reserved.
  * This code is licensed under the GNU General Public License v3.0.
  */
 
 package dev.mooner.configdsl.adapters
 
+import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import dev.mooner.configdsl.ConfigOption
-import dev.mooner.configdsl.ConfigStructure
-import dev.mooner.configdsl.MutableDataMap
-import kotlinx.coroutines.flow.SharedFlow
+import dev.mooner.configdsl.*
+import dev.mooner.configdsl.ConfigDSL.getIsDevMode
+import dev.mooner.configdsl.options.CategoryConfigOption
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.*
 import kotlin.coroutines.CoroutineContext
 
-abstract class ParentConfigAdapter<VH: RecyclerView.ViewHolder>(
-    configStructure  : ConfigStructure,
-    val configData   : MutableDataMap,
+private typealias HashCode = Int
+
+class ParentConfigAdapter(
+    private var configStructure  : ConfigStructure,
+    private val configData       : MutableDataMap,
     coroutineContext : CoroutineContext,
-): RecyclerView.Adapter<VH>() {
+): RecyclerView.Adapter<BaseViewHolder>() {
 
-    var configStructure: ConfigStructure = configStructure
-        protected set
+    //private var descCache: MutableMap<String, String> = hashMapOf()
+    private val eventScope = CoroutineScope(coroutineContext + SupervisorJob())
 
-    abstract val eventFlow: SharedFlow<ConfigOption.EventData>
+    //private var childAdapters : MutableList<CategoryRecyclerAdapter> = arrayListOf()
+    private val viewTypes     : MutableList<HashCode> = arrayListOf()
+    private val viewInstances : MutableList<RootConfigOption<*, *>> = arrayListOf()
 
-    abstract val isHavingError: Boolean
+    private val eventPublisher = MutableSharedFlow<ConfigOption.EventData>(
+        extraBufferCapacity = Channel.UNLIMITED
+    )
+    val eventFlow
+        get() = eventPublisher.asSharedFlow()
 
-    abstract fun updateStruct(structure: ConfigStructure)
+    val isHavingError: Boolean
+        get() = configStructure.any(RootConfigOption<*, *>::hasError)
 
-    abstract fun updateData(data: MutableDataMap)
+    override fun getItemViewType(position: Int): Int {
+        val viewData = configStructure[position]
 
-    abstract fun destroy()
+        return viewTypes.indexOf(viewData::class.hashCode())
+    }
+
+    override fun getItemCount(): Int =
+        if (getIsDevMode())
+            configStructure.size
+        else
+            configStructure.count { it !is CategoryConfigOption || !it.isDevModeOnly }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
+        val instance = viewInstances[viewType]
+        return instance.onCreateViewHolder(parent)
+    }
+
+    override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
+        val posData = configStructure[position]
+        val viewData = if (posData is CategoryConfigOption && posData.isDevModeOnly) {
+            if (getIsDevMode()) posData
+            else configStructure[position + 1]
+        } else posData
+
+        val childData = configData[viewData.id] ?: emptyMap()
+        @Suppress("UNCHECKED_CAST")
+        (viewData as RootConfigOption<BaseViewHolder, Any>).onDraw(holder, childData)
+    }
+
+    fun updateStruct(structure: ConfigStructure) {
+        configStructure = structure
+    }
+
+    fun updateData(data: MutableDataMap) {
+        configData.clear()
+        data.forEach(configData::put)
+    }
+
+    fun notifyAllItemInserted() {
+        notifyItemRangeInserted(0, configStructure.size)
+    }
+
+    fun destroy() {
+        eventScope.cancel()
+
+        configStructure.forEach(RootConfigOption<*, *>::onDestroyed)
+    }
+
+    init {
+        for (option in configStructure) {
+            val hash = option::class.hashCode()
+            if (hash !in viewTypes) {
+                viewTypes     += hash
+                viewInstances += option
+            }
+            option.init(eventPublisher)
+        }
+    }
 }
