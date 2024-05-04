@@ -78,17 +78,14 @@ class GlobalApplication: Application(), LifecycleEventObserver {
         }
 
         checkStartupInfo()?.let { info ->
-            if ("last_error" in info) {
-                println("Found fatal error on last run, aborting launch..")
-                val errorIntent = Intent(this, FatalErrorActivity::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    putExtra("errorMessage", info["last_error"])
-                }
-                //startupFile.delete()
-                isStartupAborted = true
-                startActivity(errorIntent)
-                return
+            println("Found fatal error on last run, aborting launch..")
+            val errorIntent = Intent(this, FatalErrorActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                putExtra("errorMessage", info)
             }
+            isStartupAborted = true
+            startActivity(errorIntent)
+            return
         }
 
         // Init LogCollector
@@ -107,9 +104,13 @@ class GlobalApplication: Application(), LifecycleEventObserver {
 
         ApplicationSession.init(applicationContext)
             .onEach {
+                lastStageValue = it
                 EventHandler.fireEvent(ApplicationEvent.Session.StageUpdate(it))
             }
             .onCompletion {
+                lastStageValue = null
+                EventHandler.fireEvent(ApplicationEvent.Session.StageUpdate(null))
+
                 EventHandler.apply {
                     on(callback = ::onProjectCreated)
                     on(callback = ::onProjectInfoUpdated)
