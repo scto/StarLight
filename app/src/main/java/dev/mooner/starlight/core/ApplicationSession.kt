@@ -146,7 +146,7 @@ object ApplicationSession {
             addWidget(pContext, UptimeWidgetSlim::class.java)
             addWidget(pContext, LogsWidget::class.java)
             addWidget(pContext, LogGenWidget::class.java)
-            addWidget(pContext, DashboardWidget::class.java)
+            //addWidget(pContext, DashboardWidget::class.java)
         }
 
         registerProjectEvents(pContext) {
