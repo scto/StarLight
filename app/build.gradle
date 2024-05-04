@@ -97,8 +97,10 @@ dependencies {
     implementation "com.afollestad.material-dialogs:core:3.3.0"
     implementation "com.afollestad.material-dialogs:input:3.3.0"
     implementation "com.afollestad.material-dialogs:color:3.3.0"
+    //implementation "com.afollestad.material-dialogs:files:3.3.0"
     implementation "com.afollestad.material-dialogs:lifecycle:3.3.0"
-    implementation name: "bottomsheets-debug", ext: "aar"
+    implementation name: "bottomsheets-release", ext: "aar"
+    implementation name: "files-release", ext: "aar"
 
     implementation "jp.wasabeef:recyclerview-animators:4.0.2"
     implementation "com.github.dhaval2404:imagepicker:2.1"
@@ -107,7 +109,7 @@ dependencies {
     implementation "com.github.acefalobi:android-stepper:58443a14ba"
     implementation "com.google.android.flexbox:flexbox:3.0.0"
     implementation "com.github.ismaeldivita:chip-navigation-bar:1.4.0"
-    implementation "com.jakewharton:process-phoenix:2.1.2"
+    implementation "com.jakewharton:process-phoenix:2.2.0"
     implementation files("libs/PeekAlert-release.aar")
     implementation "com.mikepenz:aboutlibraries-core:${aboutlibs_version}"
     implementation "com.mikepenz:aboutlibraries:${aboutlibs_version}"
@@ -115,7 +117,7 @@ dependencies {
     implementation "com.mikepenz:fastadapter:${fastadapter_version}"
     implementation "com.mikepenz:fastadapter-extensions-binding:${fastadapter_version}"
 
-    implementation "androidx.tonyodev.fetch2:xfetch2:3.1.6"
+    implementation "io.noties.markwon:core:4.6.2"
 
     implementation group: "org.mozilla", name: "rhino-runtime", version: "1.7.13" // Remaining on version 1.7.13 due to NoClassDefFoundError
     implementation (name: "rhino-android-release", ext: "aar") {
@@ -123,6 +125,6 @@ dependencies {
     }
     implementation "com.jakewharton.android.repackaged:dalvik-dx:11.0.0_r3"
 
-    implementation project(":PluginCore")
     implementation project(":ConfigDSL")
+    implementation project(":PluginCore")
 }
