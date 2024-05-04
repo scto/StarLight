@@ -41,9 +41,9 @@ import dev.mooner.starlight.plugincore.event.Events
 import dev.mooner.starlight.plugincore.event.on
 import dev.mooner.starlight.plugincore.logger.LogData
 import dev.mooner.starlight.plugincore.logger.LogType
+import dev.mooner.starlight.utils.dp
 import dev.mooner.starlight.utils.setCommonAttrs
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
@@ -66,7 +66,7 @@ class LogsFragment : Fragment(), OnClickListener {
 
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                val logs = LogCollector.logs
+                val logs = LogCollector.logs.toList()
                 logs.takeIf { l -> l[0].hashCode() != lastHash }
                     ?.let { l ->
                         if (itemAdapter == null)
@@ -105,8 +105,19 @@ class LogsFragment : Fragment(), OnClickListener {
             binding.recyclerViewLogs.visibility = View.VISIBLE
         }
 
-        binding.cardViewTypeConfig.setOnClickListener(this)
-        binding.cardViewFilter.setOnClickListener(this)
+        binding.logSettings.setOnClickListener(this)
+        binding.logFilter.setOnClickListener(this)
+        binding.logAutoscroll.apply {
+            setOnCheckedChangeListener { _, isChecked ->
+                autoScroll = isChecked
+                GlobalConfig.edit {
+                    category("logs").apply {
+                        set("auto_scroll", isChecked)
+                    }
+                }
+            }
+            isChecked = autoScroll
+        }
 
         createAdapter(binding.recyclerViewLogs, logs)
         binding.recyclerViewLogs.post {
@@ -116,15 +127,14 @@ class LogsFragment : Fragment(), OnClickListener {
         EventHandler.on(lifecycleScope, ::onLogCreated)
         setLastHash()
 
-        //binding.root.layoutTransition = LayoutTransition()
         return binding.root
     }
 
     override fun onClick(v: View) {
         when(v.id) {
-            R.id.cardViewTypeConfig ->
+            R.id.log_settings ->
                 showModeSelectDialog(requireActivity())
-            R.id.cardViewFilter ->
+            R.id.log_filter ->
                 showLogFilterConfigDialog(requireActivity())
         }
     }
@@ -151,7 +161,6 @@ class LogsFragment : Fragment(), OnClickListener {
     }
 
     private fun RecyclerView.init(adapter: RecyclerView.Adapter<*>) {
-        //itemAnimator = FadeInUpAnimator()
         layoutManager = initLayoutManager(context)
         this.adapter = adapter
         visibility = View.VISIBLE
@@ -171,7 +180,6 @@ class LogsFragment : Fragment(), OnClickListener {
     private fun saveLogFilterConfig() {
         GlobalConfig.edit {
             category("logs").apply {
-                set("auto_scroll", autoScroll)
                 set("types", Session.json.encodeToString(types))
                 set("tags", Session.json.encodeToString(tags))
                 if (msgRegex != null)
@@ -212,13 +220,12 @@ class LogsFragment : Fragment(), OnClickListener {
                 dismiss()
             }
 
-            binding.toggleAutoScroll.isChecked = autoScroll
             binding.chipGroupTags.apply {
                 if (layoutTransition == null)
                     layoutTransition = LayoutTransition()
                 layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
             }
-            val logTypes = LogType.values().sortedBy { it.priority }
+            val logTypes = LogType.entries.sortedBy { it.priority }
             for ((idx, type) in logTypes.withIndex())
                 Chip(context)
                     .apply {
@@ -226,6 +233,8 @@ class LogsFragment : Fragment(), OnClickListener {
                         text = type.name
                         isCheckable = true
                         isChecked = type in types
+                        chipStartPadding = dp(8f)
+                        chipEndPadding = dp(8f)
                         setChipBackgroundColorResource(R.color.chip_selector)
                     }
                     .let(binding.chipGroupTags::addView)
@@ -234,7 +243,6 @@ class LogsFragment : Fragment(), OnClickListener {
 
             negativeButton(res = R.string.cancel, click = MaterialDialog::dismiss)
             positiveButton(res = R.string.ok) {
-                autoScroll = binding.toggleAutoScroll.isChecked
                 types = binding.chipGroupTags.checkedChipIds.map(logTypes::get)
                 tags  = binding.editTextTags.text.toString()
                     .ifBlank { null }

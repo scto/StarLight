@@ -59,7 +59,7 @@
     <string name="project_info">정보</string>
     <string name="project_favorite">즐겨찾기</string>
 
-    <string name="aligned_by">정렬</string>
+    <string name="aligned_by">정렬: %s</string>
     <string name="default_placeholder">DEFAULT</string>
 
     <string name="no_projects">아직 프로젝트가 없는 것 같아요! (⊙_⊙;)</string>

@@ -63,7 +63,7 @@
     <string name="project_info">Info</string>
     <string name="project_favorite">Like</string>
 
-    <string name="aligned_by">Aligned by</string>
+    <string name="aligned_by">Align: %s</string>
     <string name="default_placeholder" translatable="false">DEFAULT</string>
 
     <string name="no_projects">There are no projects yet! (⊙_⊙;)</string>

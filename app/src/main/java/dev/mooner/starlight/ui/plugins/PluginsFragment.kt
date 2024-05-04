@@ -8,8 +8,10 @@ package dev.mooner.starlight.ui.plugins
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.CheckBox
 import androidx.fragment.app.Fragment
@@ -21,13 +23,18 @@ import com.afollestad.materialdialogs.bottomsheets.BasicGridItem
 import com.afollestad.materialdialogs.bottomsheets.BottomSheet
 import com.afollestad.materialdialogs.bottomsheets.gridItems
 import com.afollestad.materialdialogs.customview.customView
+import com.afollestad.materialdialogs.files.fileChooser
+import dev.mooner.peekalert.PeekAlert
 import dev.mooner.starlight.R
 import dev.mooner.starlight.databinding.FragmentPluginsBinding
 import dev.mooner.starlight.plugincore.Session.pluginManager
 import dev.mooner.starlight.plugincore.config.GlobalConfig
 import dev.mooner.starlight.plugincore.config.GlobalConfig.getDefaultCategory
 import dev.mooner.starlight.plugincore.plugin.StarlightPlugin
+import dev.mooner.starlight.plugincore.utils.getStarLightDirectory
 import dev.mooner.starlight.utils.align.Align
+import dev.mooner.starlight.utils.createSimplePeek
+import dev.mooner.starlight.utils.createSuccessPeek
 import dev.mooner.starlight.utils.setCommonAttrs
 import jp.wasabeef.recyclerview.animators.FadeInUpAnimator
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +43,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 
-class PluginsFragment : Fragment() {
+class PluginsFragment : Fragment(), OnClickListener {
 
     private var _binding: FragmentPluginsBinding? = null
     private val binding get() = _binding!!
@@ -49,15 +56,14 @@ class PluginsFragment : Fragment() {
         ALIGN_FILE_SIZE,
     )
 
-    private var alignState: Align<StarlightPlugin> = getAlignByName(
-        GlobalConfig
-            .getDefaultCategory()
-            .getString(CONFIG_PLUGINS_ALIGN, DEFAULT_ALIGN.name)
-    )?: DEFAULT_ALIGN
+    private var alignState: Align<StarlightPlugin> =
+        getAlignByName(
+            getDefaultCategory()
+                .getString(CONFIG_PLUGINS_ALIGN, DEFAULT_ALIGN.name)
+        )?: DEFAULT_ALIGN
 
     private var isReversed: Boolean =
-        GlobalConfig
-            .getDefaultCategory()
+        getDefaultCategory()
             .getString(CONFIG_PLUGINS_ALIGN, DEFAULT_ALIGN.name)
             .toBoolean()
 
@@ -83,10 +89,14 @@ class PluginsFragment : Fragment() {
             }
         }
 
-        binding.cardViewPluginAlign.setOnClickListener(::onClick)
-
-        binding.textViewAlignState.text = if (isReversed) alignState.reversedName else alignState.name
-        binding.alignStateIcon.setImageResource(alignState.icon)
+        binding.alignPlugin.apply {
+            setOnClickListener(this@PluginsFragment)
+            setChipIconResource(alignState.icon)
+            text = getString(R.string.aligned_by)
+                .format(if (isReversed) alignState.reversedName else alignState.name)
+        }
+        binding.loadFromFile.setOnClickListener(this)
+        binding.pluginStore.setOnClickListener(this)
 
         listAdapter = PluginsListAdapter(requireContext())
 
@@ -110,35 +120,70 @@ class PluginsFragment : Fragment() {
         return binding.root
     }
 
-    private fun onClick(view: View) {
+    override fun onClick(view: View) {
         when(view) {
-            binding.cardViewPluginAlign -> showAlignDialog()
+            binding.alignPlugin -> showAlignDialog()
+            binding.loadFromFile -> showFileChooserDialog()
+            binding.pluginStore -> {
+                createSuccessPeek("아직 구현되지 않았어요 (◞‸◟；)", PeekAlert.Position.Bottom).peek()
+            }
+            // TODO: Plugin store handler
         }
     }
 
-    @SuppressLint("CheckResult")
     private fun showAlignDialog() =
-        MaterialDialog(requireContext(), BottomSheet(LayoutMode.WRAP_CONTENT)).show {
-            setCommonAttrs()
-            gridItems(aligns.toGridItems()) { dialog, _, item ->
+        MaterialDialog(requireContext(), BottomSheet(LayoutMode.WRAP_CONTENT))
+            .gridItems(aligns.toGridItems()) { dialog, _, item ->
                 alignState = getAlignByName(item.title)?: DEFAULT_ALIGN
                 isReversed = dialog.findViewById<CheckBox>(R.id.checkBoxAlignReversed).isChecked
                 update()
             }
-            //customView(R.layout.dialog_align_state)
-            customView(R.layout.dialog_align_plugins)
-            findViewById<CheckBox>(R.id.checkBoxAlignReversed).isChecked = isReversed
-        }
+            .show {
+                setCommonAttrs()
+                customView(R.layout.dialog_align_plugins)
+                findViewById<CheckBox>(R.id.checkBoxAlignReversed).isChecked = isReversed
+            }
+
+    private fun showFileChooserDialog() =
+        MaterialDialog(requireContext(), BottomSheet(LayoutMode.WRAP_CONTENT))
+            .fileChooser(requireActivity(), filter = { it.isDirectory || it.extension == "slp" }, initialDirectory = Environment.getExternalStorageDirectory()) { _, file ->
+                println("selected: $file")
+                try {
+                    val destFile = getStarLightDirectory().resolve("plugins").resolve(file.name)
+                    file.copyTo(destFile, overwrite = true)
+                } catch (e: Exception) {
+                    createSimplePeek(
+                        text = "파일 복사 실패: ${e.message}"
+                    ) {
+                        position = PeekAlert.Position.Bottom
+                        iconRes = R.drawable.ic_round_error_outline_24
+                        iconTint(res = R.color.code_orange)
+                        backgroundColor(res = R.color.background_popup)
+                    }.peek()
+                }
+                createSimplePeek(
+                    text = "${file.name} 로드 완료, 다음 재시작 시 적용됩니다."
+                ) {
+                    position = PeekAlert.Position.Bottom
+                    iconRes = R.drawable.ic_round_check_24
+                    iconTint(res = R.color.noctis_green)
+                    backgroundColor(res = R.color.background_popup)
+                }.peek()
+            }
+            .show {
+                setCommonAttrs()
+            }
 
     private fun getAlignByName(name: String): Align<StarlightPlugin>? =
         aligns.find { it.name == name }
 
-    private fun Array<Align<StarlightPlugin>>.toGridItems(): List<BasicGridItem> = this.map { item ->
-        BasicGridItem(
-            iconRes = item.icon,
-            title = item.name
-        )
-    }
+    private fun Array<Align<StarlightPlugin>>.toGridItems(): List<BasicGridItem> =
+        this.map { item ->
+            BasicGridItem(
+                iconRes = item.icon,
+                title = item.name
+            )
+        }
 
     private fun sortData(): List<StarlightPlugin> {
         val aligned = plugins.sortedWith(alignState.comparator)
@@ -156,8 +201,10 @@ class PluginsFragment : Fragment() {
     }
 
     private fun update() {
-        binding.textViewAlignState.text = if (isReversed) alignState.reversedName else alignState.name
-        binding.alignStateIcon.setImageResource(alignState.icon)
+        binding.alignPlugin.setChipIconResource(alignState.icon)
+        binding.alignPlugin.text = getString(R.string.aligned_by)
+            .format(if (isReversed) alignState.reversedName else alignState.name)
+
         reloadList(sortData())
         GlobalConfig.edit {
             getDefaultCategory().apply {

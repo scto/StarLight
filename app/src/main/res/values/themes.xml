@@ -21,6 +21,10 @@
 
         <item name="android:activityOpenEnterAnimation">
             @anim/activity_fade_in</item>
+
+        <item name="chipMinHeight">40dp</item>
+        <item name="chipCornerRadius">15dp</item>
+        <item name="chipBackgroundColor">#fcfcff</item>
     </style>
 
     <style name="Theme.StarLight.Editor" parent="Theme.StarLight">

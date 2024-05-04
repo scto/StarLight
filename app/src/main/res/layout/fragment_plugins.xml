@@ -14,59 +14,72 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
+    tools:background="@color/background"
     tools:context=".ui.projects.ProjectsFragment">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardViewPluginAlign"
+    <HorizontalScrollView
         android:layout_width="match_parent"
-        android:layout_height="@dimen/card_height"
-        android:layout_marginHorizontal="@dimen/card_margin_horizontal"
-        app:cardCornerRadius="@dimen/card_radius"
-        app:cardElevation="@dimen/card_elevation">
+        android:layout_height="wrap_content"
+        android:scrollbars="none">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/main_bright"
-            android:gravity="center_vertical">
+        <com.google.android.material.chip.ChipGroup
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:paddingHorizontal="@dimen/card_margin_horizontal"
+            app:singleLine="true">
 
-            <ImageView
-                android:id="@+id/alignStateIcon3"
-                android:layout_width="0dp"
-                android:layout_height="20dp"
-                android:layout_marginStart="20dp"
-                android:src="@drawable/ic_round_format_list_bulleted_24"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="#FFFFFF" />
-
-            <ImageView
-                android:id="@+id/alignStateIcon"
-                android:layout_width="0dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_round_sort_by_alpha_24"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/textViewAlignState"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="#FFFFFF" />
-
-            <TextView
-                android:id="@+id/textViewAlignState"
-                android:layout_width="0dp"
+            <com.google.android.material.chip.Chip
+                android:id="@+id/align_plugin"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="14dp"
-                android:layout_weight="0.15"
-                android:fontFamily="@font/nanumsquare_round_extrabold"
-                android:text="@string/default_placeholder"
-                android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:maxHeight="48dp"
+                android:minWidth="92dp"
+                android:text="@string/aligned_by"
+                tools:text="정렬: 가나다 역순"
+                app:chipStartPadding="11dp"
+                app:chipEndPadding="8dp"
+                app:chipIconTint="#80BCBD"
+                app:chipIcon="@drawable/ic_round_sort_by_alpha_24"
+                app:chipMinHeight="48dp"
+                app:chipCornerRadius="18dp"
+                app:chipBackgroundColor="@color/background_chip"/>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/load_from_file"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxHeight="48dp"
+                android:minWidth="48dp"
+                android:text="@string/add"
+                android:textColor="@color/text"
+                app:chipBackgroundColor="@color/background_chip"
+                app:chipCornerRadius="18dp"
+                app:chipEndPadding="8dp"
+                app:chipIcon="@drawable/ic_round_folder_24"
+                app:chipIconTint="#50727B"
+                app:chipMinHeight="48dp"
+                app:chipStartPadding="11dp"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/plugin_store"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxHeight="48dp"
+                android:minWidth="48dp"
+                android:text="스토어"
+                android:textColor="@color/text"
+                app:chipBackgroundColor="@color/background_chip"
+                app:chipCornerRadius="18dp"
+                app:chipEndPadding="8dp"
+                app:chipIcon="@drawable/ic_round_download_24"
+                app:chipIconTint="#E9B824"
+                app:chipMinHeight="48dp"
+                app:chipStartPadding="11dp"/>
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </HorizontalScrollView>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"

@@ -8,6 +8,7 @@ package dev.mooner.starlight.ui.projects
 
 import android.animation.LayoutTransition
 import android.annotation.SuppressLint
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,12 +16,9 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.EditText
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
 import com.afollestad.materialdialogs.LayoutMode
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.bottomsheets.BottomSheet
@@ -31,6 +29,7 @@ import com.google.android.material.chip.ChipGroup
 import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
+import dev.mooner.peekalert.PeekAlert
 import dev.mooner.starlight.MainActivity
 import dev.mooner.starlight.R
 import dev.mooner.starlight.databinding.DialogNewProjectBinding
@@ -44,17 +43,20 @@ import dev.mooner.starlight.plugincore.event.Events
 import dev.mooner.starlight.plugincore.event.on
 import dev.mooner.starlight.plugincore.logger.LoggerFactory
 import dev.mooner.starlight.plugincore.project.Project
+import dev.mooner.starlight.plugincore.project.ProjectID
 import dev.mooner.starlight.plugincore.project.event.ProjectEventManager
 import dev.mooner.starlight.plugincore.project.event.getInstance
+import dev.mooner.starlight.plugincore.translation.Locale
+import dev.mooner.starlight.plugincore.translation.translate
 import dev.mooner.starlight.utils.align.Align
 import dev.mooner.starlight.utils.align.toGridItems
+import dev.mooner.starlight.utils.createSuccessPeek
+import dev.mooner.starlight.utils.dp
 import dev.mooner.starlight.utils.setCommonAttrs
 import dev.mooner.starlight.utils.warn
 import jp.wasabeef.recyclerview.animators.FadeInUpAnimator
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.*
 import java.lang.ref.WeakReference
 import kotlin.math.min
 
@@ -93,26 +95,21 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
     ): View {
         _binding = FragmentProjectsBinding.inflate(inflater, container, false)
 
-        //val activity = activity as MainActivity
-        //recyclerAdapter = ProjectListAdapter(activity)
         itemAdapter = ItemAdapter()
         val fastAdapter = FastAdapter.with(itemAdapter!!)
 
         projects = projectManager.getProjects()
 
         binding.apply {
-            fabNewProject.setOnClickListener(this@ProjectsFragment)
+            binding.alignProject.text = getString(R.string.aligned_by)
+                .format(if (isReversed) alignState.reversedName else alignState.name)
+            binding.alignProject.setChipIconResource(alignState.icon)
 
-            cardViewProjectAlign.setOnClickListener(this@ProjectsFragment)
-
-            textViewAlignState.text = if (isReversed) alignState.reversedName else alignState.name
-
-            alignStateIcon.load(alignState.icon)
+            alignProject.setOnClickListener(this@ProjectsFragment)
+            newProject.setOnClickListener(this@ProjectsFragment)
 
             recyclerViewProjectList.setup(fastAdapter)
         }
-
-        //updateTitle(projects)
 
         updateReceiveScope = CoroutineScope(Dispatchers.Default + SupervisorJob()).also { scope ->
             EventHandler.apply {
@@ -125,15 +122,11 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
 
         lifecycleScope.launchWhenCreated {
             updateEmptyText()
-            launch {
-                val weakThis = WeakReference<Fragment>(this@ProjectsFragment)
-                sortDataAsync()
-                    .flowWithLifecycle(lifecycle, Lifecycle.State.CREATED)
-                    .transform { list ->
-                        emit(list.map { ProjectListItem(weakThis).withProject(it) })
-                    }
-                    .collect(itemAdapter!!::set)
-            }
+            val weakThis = WeakReference<Fragment>(this@ProjectsFragment)
+            sortDataAsync()
+                .map { ProjectListItem(weakThis).withProject(it) }
+                .toList()
+                .also(::reloadList)
         }
 
         return binding.root
@@ -141,8 +134,8 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
 
     override fun onClick(view: View) {
         when(view.id) {
-            R.id.cardViewProjectAlign -> showProjectAlignDialog()
-            R.id.fabNewProject -> showNewProjectDialog()
+            R.id.align_project -> showProjectAlignDialog()
+            R.id.new_project -> showNewProjectDialog()
         }
     }
 
@@ -152,11 +145,11 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
     private suspend fun onProjectCompiled(event: Events.Project.Compile) =
         itemAdapter?.updateProjectView(event.project)
 
-    private suspend fun onProjectDeleted(unused: Events.Project.Delete) =
-        updateList(null)
+    private suspend fun onProjectDeleted(event: Events.Project.Delete) =
+        notifyProjectRemoved(event.projectId, event.projectName)
 
     private suspend fun onProjectCreated(event: Events.Project.Create) =
-        updateList(event.project)
+        notifyProjectAdded(event.project)
 
     private fun RecyclerView.setup(adapter: FastAdapter<ProjectListItem>) {
         itemAnimator = FadeInUpAnimator()
@@ -194,15 +187,27 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
         }
     }
 
-    private suspend fun updateList(project: Project?) {
+    private suspend fun notifyProjectRemoved(projectId: ProjectID, projectName: String) {
+        withContext(Dispatchers.Main) {
+            binding.recyclerViewProjectList.post {
+                itemAdapter?.removeByIdentifier(projectId.hashCode().toLong())
+            }
+            createSuccessPeek(translate {
+                Locale.ENGLISH { "Successfully removed project $projectName" }
+                Locale.KOREAN  { "프로젝트 $projectName 삭제 완료" }
+            }, PeekAlert.Position.Bottom).peek()
+        }
+    }
+
+    private suspend fun notifyProjectAdded(project: Project) {
         projects = projectManager.getProjects()
+        val weakRef = WeakReference<Fragment>(this)
         withContext(Dispatchers.Main) {
             updateEmptyText()
-            update()
-
-            project?.let {
-                binding.recyclerViewProjectList.post {
-                    itemAdapter?.scrollTo(it)
+            binding.recyclerViewProjectList.post {
+                itemAdapter?.apply {
+                    add(ProjectListItem(weakRef).withProject(project))
+                    scrollTo(project)
                 }
             }
         }
@@ -251,10 +256,19 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
                     id = index
                     text = language.name
                     setChipBackgroundColorResource(R.color.chip_selector)
-                    isCheckable = true
-                    if (index == 0) {
-                        isChecked = true
+                    if (language.id == "JS_RHINO")
+                        setChipIconResource(R.drawable.ic_js)
+                    else {
+                        val iconFile = language.getIconFile()
+                        if (iconFile.exists())
+                            chipIcon = Drawable.createFromPath(language.getIconFile().path)
+                        else
+                            setChipIconResource(R.drawable.ic_round_developer_mode_24)
                     }
+                    chipMinHeight = dp(36f)
+                    isCheckable = true
+                    if (index == 0)
+                        isChecked = true
                 }.also(chipGroup::addView)
             }
 
@@ -293,62 +307,58 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
                     return@positiveButton
                 }
                 val selectedLang = Session.languageManager.getLanguages()[id]
-                projectManager.newProject(events = mAdapter.getSelectedEventIds()) {
-                    name = projectName
-                    mainScript = "$projectName.${selectedLang.fileExtension}"
-                    languageId = selectedLang.id
-                }
                 it.dismiss()
+                lifecycleScope.launch(Dispatchers.IO) {
+                    projectManager.newProject(events = mAdapter.getSelectedEventIds()) {
+                        name       = projectName
+                        mainScript = "$projectName.${selectedLang.fileExtension}"
+                        languageId = selectedLang.id
+                    }
+                }
             }
             negativeButton(res = R.string.cancel) {
                 it.dismiss()
             }
-            //onDismiss {
-            //    binding.fabNewProject.show()
-            //`}
         }
 
     private fun getAlignByName(name: String): Align<Project>? =
         aligns.find { it.name == name }
 
-    private fun sortDataAsync(): Flow<List<Project>> =
+    private fun sortDataAsync(): Flow<Project> =
         flow {
             val comparable = compareByDescending<Project> { it.info.isPinned }
                 .thenByDescending(Project::isCompiled)
                 .thenComparing(alignState.comparator)
-            emit(projects
-                .sortedWith(comparable)
-                .let { if (isReversed) it.reversed() else it })
+            val sorted = if (isReversed)
+                projects
+                    .sortedWith(comparable)
+                    .reversed()
+            else
+                projects
+                    .sortedWith(comparable)
+            emitAll(sorted.asFlow())
         }
 
     private fun reloadList(list: List<ProjectListItem>) {
         binding.recyclerViewProjectList.post {
             itemAdapter?.set(list)
         }
-        /*
-        recyclerAdapter?.apply {
-            val orgDataSize = data.size
-            data = listOf()
-            notifyItemRangeRemoved(0, orgDataSize)
-            data = list
-            notifyItemRangeInserted(0, list.size)
-        }
-         */
     }
 
     private fun update() {
-
+        val weakThis = WeakReference<Fragment>(this@ProjectsFragment)
         lifecycleScope.launch {
-            val weakThis = WeakReference<Fragment>(this@ProjectsFragment)
             sortDataAsync()
-                .transform { list ->
-                    emit(list.map { ProjectListItem(weakThis).withProject(it) })
-                }
-                .collect(::reloadList)
+                .map { ProjectListItem(weakThis).withProject(it) }
+                .toList()
+                .also(::reloadList)
         }
 
-        binding.textViewAlignState.text = if (isReversed) alignState.reversedName else alignState.name
-        binding.alignStateIcon.load(alignState.icon)
+        //binding.textViewAlignState.text = if (isReversed) alignState.reversedName else alignState.name
+        //binding.alignStateIcon.load(alignState.icon)
+        binding.alignProject.text = getString(R.string.aligned_by)
+            .format(if (isReversed) alignState.reversedName else alignState.name)
+        binding.alignProject.setChipIconResource(alignState.icon)
 
         GlobalConfig.edit {
             getDefaultCategory().apply {
@@ -385,7 +395,6 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
 
     override fun onResume() {
         super.onResume()
-        //isPaused = false
         if (updatedProjects.isNotEmpty()) {
             for (project in updatedProjects) {
                 val index = itemAdapter?.getAdapterPosition(project.hashCode().toLong())
@@ -395,7 +404,6 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
                     }
                     continue
                 }
-                //recyclerAdapter!!.notifyItemChanged(index)
             }
             updatedProjects.clear()
         }
