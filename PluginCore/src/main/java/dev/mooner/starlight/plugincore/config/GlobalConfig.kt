@@ -18,6 +18,7 @@ import dev.mooner.starlight.plugincore.utils.getStarLightDirectory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.serialization.encodeToString
 import java.io.File
 
@@ -26,9 +27,12 @@ object GlobalConfig: MutableConfig {
     private const val FILE_NAME = "config-general.json"
     private const val DEFAULT_CATEGORY = "general"
 
-    private val mData: MutableDataMap by lazy(::loadFromFile)
     private val cachedCategories: MutableMap<String, MutableConfigCategory> = hashMapOf()
-    private val file = File(getStarLightDirectory(), FILE_NAME)
+    private val mData           : MutableDataMap by lazy(::loadFromFile)
+    private val flushScope      = CoroutineScope(Dispatchers.IO)
+    private val file            = File(getStarLightDirectory(), FILE_NAME)
+    private val fileAccessMutex = Mutex()
+
     private var isSaved: Boolean = false
 
     override fun getData(): DataMap =
@@ -58,19 +62,24 @@ object GlobalConfig: MutableConfig {
 
     override fun push() {
         isSaved = true
-        CoroutineScope(Dispatchers.IO).launch {
-            val str = json.encodeToString(mData)
-            with(file) {
-                if (!exists()) {
-                    mkdirs()
+        flushScope.launch {
+            fileAccessMutex.lock()
+            try {
+                val str = json.encodeToString(mData)
+                with(file) {
+                    if (!exists()) {
+                        mkdirs()
+                    }
+                    if (!isFile) {
+                        deleteRecursively()
+                    }
+                    writeText(str)
                 }
-                if (!isFile) {
-                    deleteRecursively()
-                }
-                writeText(str)
+            } finally {
+                fileAccessMutex.unlock()
             }
+            EventHandler.fireEvent(Events.Config.GlobalConfigUpdate())
         }
-        EventHandler.fireEventWithScope(Events.Config.GlobalConfigUpdate())
     }
 
     fun invalidateCache() {
