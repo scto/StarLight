@@ -162,7 +162,8 @@ class LogsRecyclerViewAdapter
             when(viewType) {
                 LogItem.ViewType.NORMAL ->
                     with(binding) {
-                        logInfoColor.setCardBackgroundColor(color)
+                        //logInfoColor.setCardBackgroundColor(color)
+                        logTitleText.setTextColor(color)
                         logTitleText.text = data.tag ?: data.type.name
                         logContentText.text = data.message
                         logTimeStampText.text = formatDate(data.millis)
