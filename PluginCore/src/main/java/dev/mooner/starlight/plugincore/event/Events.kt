@@ -10,6 +10,7 @@ import android.content.Context
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import dev.mooner.starlight.plugincore.logger.LogData
+import dev.mooner.starlight.plugincore.project.ProjectID
 import kotlinx.coroutines.CoroutineScope
 import dev.mooner.starlight.plugincore.project.Project as SProject
 import dev.mooner.starlight.plugincore.translation.Locale as LocaleEnum
@@ -55,7 +56,8 @@ sealed class Events {
         ): Event, CoroutineScope by coroutineScope
 
         class Delete(
-            val projectName: String,
+            val projectName : String,
+            val projectId   : ProjectID,
             val coroutineScope: CoroutineScope = eventHandlerScope()
         ): Event, CoroutineScope by coroutineScope
     }

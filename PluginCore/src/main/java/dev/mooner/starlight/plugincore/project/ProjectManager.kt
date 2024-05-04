@@ -97,12 +97,14 @@ class ProjectManager(
         removeProject(project.info.name, removeFiles)
 
     fun removeProject(name: String, removeFiles: Boolean = true) {
-        projects[name]?.let {
-            if (removeFiles)
-                it.directory.deleteRecursively()
-            projects -= name
-        }
-        EventHandler.fireEventWithScope(Events.Project.Delete(name))
+        val project = projects[name] ?: return
+
+        if (project.isCompiled)
+            project.destroy()
+        if (removeFiles)
+            project.directory.deleteRecursively()
+        projects -= name
+        EventHandler.fireEventWithScope(Events.Project.Delete(name, project.info.id))
     }
 
     internal fun purge() =
