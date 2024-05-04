@@ -171,6 +171,25 @@ class LegacyApi: Api<LegacyApi.Api>() {
             return result
         }
 
+        @JvmOverloads
+        fun replyToID(roomID: String, message: String, hideToast: Boolean = false): Boolean {
+            val result = NotificationListener.sendToID(roomID, message)
+            if (!hideToast && !result) {
+                val context = GlobalApplication.requireContext()
+                val content = context
+                    .getString(R.string.api_cannot_send_to_room)
+                    .format(roomID)
+
+                showToast(content, Toast.LENGTH_LONG)
+                LOG.warn { content }
+            }
+            return result
+        }
+
+        @JvmOverloads
+        fun replyToID(roomID: Long, message: String, hideToast: Boolean = false): Boolean =
+            replyToID(roomID.toString(), message, hideToast)
+
         fun canReply(room: String): Boolean {
             return NotificationListener.hasRoom(room)
         }
@@ -203,10 +222,10 @@ class LegacyApi: Api<LegacyApi.Api>() {
             System.gc()
         }
 
-        fun UIThread(func: Callable<Any>, onComplete: (error: Throwable?, result: Any?) -> Unit) {
+        @JvmOverloads
+        fun UIThread(func: Callable<Any>, onComplete: (error: Throwable?, result: Any?) -> Unit = { _, _ -> }) {
             runBlocking {
-                flow<Any> {
-                    emit(func.call()) }
+                flow<Any> { emit(func.call()) }
                     .flowOn(Dispatchers.Main)
                     .catch { e ->
                         onComplete(e, null)

@@ -328,6 +328,8 @@ class NotificationListener: NotificationListenerService() {
             lastReceivedRoom?.send(message) ?: false
         fun sendTo(roomName: String, message: String): Boolean =
             getRoomByName(roomName)?.send(message) ?: false
+        fun sendToID(roomId: RoomID, message: String): Boolean =
+            chatRooms[roomId]?.send(message) ?: false
 
         fun markAsRead(): Boolean =
             lastReceivedRoom?.markAsRead() ?: false
