@@ -51,15 +51,15 @@ class AndroidRParserSpec: MessageParserSpec {
         val senderName = extras.getString(NotificationCompat.EXTRA_TITLE).toString()
 
         //val senderId = extras.getParcelableArray(getRuleOrDefault(ruleKey, "senderId", EXTRA_MESSAGES))!![0]
-        @Suppress("UNCHECKED_CAST")
         val messages = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             extras.getParcelableArray(NotificationCompat.EXTRA_MESSAGES, Bundle::class.java)!!
         } else {
-            extras.getParcelableArray(NotificationCompat.EXTRA_MESSAGES)!!.let {
-                val nArr = Array<Bundle?>(it.size) { null }
-                it.forEachIndexed { index, parcelable -> nArr[index] = parcelable as Bundle }
-                nArr
-            }
+            extras.getParcelableArray(NotificationCompat.EXTRA_MESSAGES)!!
+                .let { pcArr ->
+                    Array(pcArr.size) { idx ->
+                        pcArr[idx] as Bundle
+                    }
+                }
         }
 
         val sender = messages[0].let {
