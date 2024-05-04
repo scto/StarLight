@@ -82,6 +82,9 @@ class MutableConfigCategory(
     override fun getDouble(key: String): Double? =
         get(key)?.double
 
+    override fun getSubCategory(key: String): MutableConfigCategory? =
+        data[key]?.jsonObject?.toMutableMap()?.let(::MutableConfigCategory)
+
     override fun getList(key: String): List<JsonElement>? =
         data[key]?.jsonArray
 

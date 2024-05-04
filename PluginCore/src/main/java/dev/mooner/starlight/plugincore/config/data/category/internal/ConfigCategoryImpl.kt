@@ -37,6 +37,9 @@ internal class ConfigCategoryImpl(
     override fun getDouble(key: String): Double? =
         get(key)?.double
 
+    override fun getSubCategory(key: String): ConfigCategoryImpl? =
+        data[key]?.jsonObject?.toMutableMap()?.let(::ConfigCategoryImpl)
+
     override fun getList(key: String): List<JsonElement>? =
         data[key]?.jsonArray
 

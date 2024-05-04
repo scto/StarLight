@@ -30,6 +30,8 @@ interface ConfigCategory {
 
     fun getDouble(key: String, default: Double): Double = getDouble(key)?: default
 
+    fun getSubCategory(key: String): ConfigCategory?
+
     fun getList(key: String): List<JsonElement>?
 
     fun getObject(key: String): JsonObject?

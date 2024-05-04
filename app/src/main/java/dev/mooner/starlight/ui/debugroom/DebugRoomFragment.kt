@@ -281,12 +281,12 @@ class DebugRoomFragment: Fragment() {
 
         project.fireEvent<ProjectOnMessageEvent>(data, onFailure = ::showErrorSnackbar)
 
-        if (GlobalConfig.category("notifications").getBoolean("use_legacy_event", false)) {
-            val replier = Replier { _, msg, _ ->
-                onSend(msg)
-                true
-            }
-
+        val useLegacyEvent = GlobalConfig
+            .category("notifications")
+            .getSubCategory("event")
+            ?.getBoolean("use_legacy_event", false)
+            ?: false
+        if (useLegacyEvent) {
             val imageDB = ImageDB(selfProfileBitmap)
 
             project.fireEvent<LegacyEvent>(roomName, message, sender, isGroupChat, replier, imageDB, onFailure = ::showErrorSnackbar)

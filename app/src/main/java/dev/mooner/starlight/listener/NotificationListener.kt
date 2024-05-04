@@ -363,12 +363,18 @@ class NotificationListener: NotificationListenerService() {
 
         legacyEvent = GlobalConfig
             .category("notifications")
-            .getBoolean("use_legacy_event", legacyEvent)
+            .getSubCategory("event")
+            ?.getBoolean("use_legacy_event", legacyEvent)
+            ?: legacyEvent
         useNPostedEvent = GlobalConfig
             .category("beta_features")
-            .getBoolean("use_on_notification_posted", useNPostedEvent)
+            .getSubCategory("noti")
+            ?.getBoolean("use_on_notification_posted", useNPostedEvent)
+            ?: useNPostedEvent
         logRecMessage = GlobalConfig
             .category("notifications")
-            .getBoolean("log_received_message", logRecMessage)
+            .getSubCategory("event")
+            ?.getBoolean("log_received_message", logRecMessage)
+            ?: logRecMessage
     }
 }
