@@ -119,9 +119,10 @@ dependencies {
 
     implementation "io.noties.markwon:core:4.6.2"
 
-    implementation group: "org.mozilla", name: "rhino-runtime", version: "1.7.13" // Remaining on version 1.7.13 due to NoClassDefFoundError
+    //implementation group: "org.mozilla", name: "rhino-runtime", version: "1.7.13" // Remaining on version 1.7.13 due to NoClassDefFoundError
+    implementation files("libs/rhino-1.7.15-SNAPSHOT.jar")
     implementation (name: "rhino-android-release", ext: "aar") {
-        //exclude group: "org.mozilla", module: "rhino-runtime" // Replace rhino dependency to 1.7.14
+        exclude group: "org.mozilla", module: "rhino-runtime" // Replace rhino dependency to 1.7.14
     }
     implementation "com.jakewharton.android.repackaged:dalvik-dx:11.0.0_r3"
 
