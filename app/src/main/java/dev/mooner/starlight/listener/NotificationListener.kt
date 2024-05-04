@@ -299,14 +299,18 @@ class NotificationListener: NotificationListenerService() {
         private fun detectRule(): RuleData {
             var specId = "default"
 
-            val kakaoTalkVersion = ApplicationSession.kakaoTalkVersion
+            //val kakaoTalkVersion = ApplicationSession.kakaoTalkVersion
             val androidVersion = Build.VERSION.SDK_INT
 
+            /*
             if (kakaoTalkVersion != null &&
                 kakaoTalkVersion newerThan "9.7.0" &&
                 androidVersion >= Build.VERSION_CODES.R) {
                 specId = "android_r"
             }
+             */
+            if (androidVersion >= Build.VERSION_CODES.R) // KakaoTalk < 10.2.0 Deprecated, only check android version...
+                specId = "android_r"
 
             return RuleData(
                 packageName = PACKAGE_KAKAO_TALK,
