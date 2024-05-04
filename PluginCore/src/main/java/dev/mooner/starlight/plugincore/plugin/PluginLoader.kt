@@ -175,7 +175,7 @@ class PluginLoader {
                     plugin.getListeners().forEach(EventListener::onEnable)
                 } catch (e: Throwable) {
                     logger.error(e)
-                    if (Session.isDebugging)
+                    if (Info.DEBUG)
                         e.printStackTrace()
                 }
             }
@@ -450,6 +450,6 @@ class PluginLoader {
             arrayOf(/*"apk", "jar", "aar", */"slp")
 
         val PRESERVED_IDS =
-            arrayOf("global", "starlight", "system")
+            arrayOf("global", "starlight", "system", "core")
     }
 }

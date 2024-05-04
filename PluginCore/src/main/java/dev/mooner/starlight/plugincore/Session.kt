@@ -62,8 +62,6 @@ object Session {
     private var mApiManager: ApiManager by Delegates.notNull()
     val apiManager get() = mApiManager
 
-    const val isDebugging: Boolean = true
-
     fun init(locale: Locale, baseDir: File): PluginContext? {
         if (isInitComplete || isDuringInit) {
             Logger.w("Session", "Rejecting re-init of Session")
