@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
-    android:layout_marginBottom="8dp"
+    android:layout_marginBottom="4dp"
     android:backgroundTint="@color/transparent"
     android:theme="@style/Theme.StarLight">
 
@@ -15,8 +15,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="-2dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
         android:background="@color/cardview"
         android:paddingStart="16dp"
         app:animationDuration="200"
@@ -35,12 +33,12 @@
         android:layout_width="12dp"
         android:layout_height="30dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="10dp"
         app:cardBackgroundColor="@color/cardview"
         app:cardCornerRadius="5dp"
         app:cardElevation="0dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

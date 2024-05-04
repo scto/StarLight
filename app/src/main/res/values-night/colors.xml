@@ -8,7 +8,9 @@
     <color name="background_dialog">#1a1a1a</color>
     <color name="background_card">#171717</color>
     <color name="background_chip">#202020</color>
+    <color name="background_chip_accent">#AD977A</color>
     <color name="background_popup">#2B2B2B</color>
+    <color name="background_log_card">#212122</color>
 
     <color name="config_list_item_background">#202020</color>
 

@@ -16,8 +16,10 @@
     <color name="cardview">#FFFFFF</color>
     <color name="background_dialog">#fdfdfd</color>
     <color name="background_card">#FFFFFF</color>
-    <color name="background_chip">#F6F6F6</color>
+    <color name="background_selection_card">#F6F6F6</color>
     <color name="background_popup">#E9E9E9</color>
+    <color name="background_log_card">#f4f4f6</color>
+    <color name="background_chip_accent">#E8D9C4</color>
 
     <color name="config_list_item_background">#F0F0F0</color>
 

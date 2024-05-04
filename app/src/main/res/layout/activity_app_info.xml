@@ -55,7 +55,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:fontFamily="@font/nanumsquare_round_bold"
+                    android:fontFamily="@font/nanumsquare_round_extrabold"
                     android:text="Project StarLight"
                     android:textColor="@color/main_bright"
                     android:textSize="28sp"/>
@@ -64,7 +64,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:fontFamily="@font/nanumsquare_round_regular"
+                    android:fontFamily="@font/wantedsans_regular"
                     android:text="@string/app_version"
                     android:textColor="@color/text"
                     android:textSize="14sp"
