@@ -19,6 +19,16 @@ import java.io.File
 @Suppress("unused")
 class DeviceApi: Api<DeviceApi.Device>() {
 
+    override val name: String = "Device"
+
+    override val objects: List<ApiObject> = getApiObjects<Device>()
+
+    override val instanceClass: Class<Device> = Device::class.java
+
+    override val instanceType: InstanceType = InstanceType.CLASS
+
+    override fun getInstance(project: Project): Any = Device::class.java
+
     class Device {
 
         companion object {
@@ -135,74 +145,13 @@ class DeviceApi: Api<DeviceApi.Device>() {
                 return connInfo.ssid
             }
 
+            @JvmStatic
             fun isPowerSaveMode(): Boolean =
                 getPowerManager().isPowerSaveMode
 
+            @JvmStatic
             fun isScreenOn(): Boolean =
                 getPowerManager().isInteractive
         }
     }
-
-    override val name: String = "Device"
-
-    override val objects: List<ApiObject> = listOf(
-        function {
-            name = "getAndroidVersionCode"
-            returns = Int::class.java
-        },
-        function {
-            name = "getAndroidVersionName"
-            returns = String::class.java
-        },
-        function {
-            name = "getPhoneBrand"
-            returns = String::class.java
-        },
-        function {
-            name = "getPhoneModel"
-            returns = String::class.java
-        },
-        function {
-            name = "getBatteryIntent"
-            returns = Intent::class.java
-        },
-        function {
-            name = "isCharging"
-            returns = Boolean::class.java
-        },
-        function {
-            name = "getPlugType"
-            returns = String::class.java
-        },
-        function {
-            name = "getBatteryLevel"
-            returns = Number::class.java
-        },
-        function {
-            name = "getBatteryHealth"
-            returns = Number::class.java
-        },
-        function {
-            name = "getBatteryTemperature"
-            returns = Number::class.java
-        },
-        function {
-            name = "getBatteryVoltage"
-            returns = Number::class.java
-        },
-        function {
-            name = "getBatteryStatus"
-            returns = Number::class.java
-        },
-        function {
-            name = "getBatteryIntent"
-            returns = Intent::class.java
-        },
-    )
-
-    override val instanceClass: Class<Device> = Device::class.java
-
-    override val instanceType: InstanceType = InstanceType.CLASS
-
-    override fun getInstance(project: Project): Any = Device::class.java
 }
