@@ -29,6 +29,7 @@ class DefaultParserSpec: MessageParserSpec {
 
     override val name: String = "기본 메세지 분석 스펙"
 
+    @Suppress("DEPRECATION")
     override fun parse(
         userId: Int,
         context: Context,
@@ -40,7 +41,8 @@ class DefaultParserSpec: MessageParserSpec {
             ?: return null
 
         val message = extras.getString(NotificationCompat.EXTRA_TEXT).toString()
-        val sender = extras.getString(NotificationCompat.EXTRA_TITLE).toString()
+        val sender = (extras.getString(NotificationCompat.EXTRA_TITLE)
+            ?: extras.getString(NotificationCompat.EXTRA_TITLE_BIG)).toString()
 
         //val senderId = extras.getParcelableArray(getRuleOrDefault(ruleKey, "senderId", EXTRA_MESSAGES))!![0]
         val senderId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

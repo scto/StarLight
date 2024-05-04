@@ -22,6 +22,7 @@ import dev.mooner.starlight.core.GlobalApplication
 import dev.mooner.starlight.databinding.ActivitySplashBinding
 import dev.mooner.starlight.event.ApplicationEvent
 import dev.mooner.starlight.logging.bindLogNotifier
+import dev.mooner.starlight.plugincore.Session
 import dev.mooner.starlight.plugincore.event.EventHandler
 import dev.mooner.starlight.plugincore.event.on
 import dev.mooner.starlight.plugincore.logger.LoggerFactory
@@ -29,19 +30,16 @@ import dev.mooner.starlight.ui.splash.quickstart.QuickStartActivity
 import dev.mooner.starlight.ui.splash.quickstart.steps.SetPermissionFragment
 import dev.mooner.starlight.utils.checkPermissions
 import dev.mooner.starlight.utils.restartApplication
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 private val LOG = LoggerFactory.logger {  }
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {
 
-    private var startupJob: Job? = null
     private lateinit var binding: ActivitySplashBinding
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySplashBinding.inflate(layoutInflater)
@@ -81,8 +79,11 @@ class SplashActivity : AppCompatActivity() {
         }
 
         if (TEST_QUICK_START || isInitial || !isPermissionsGrant) {
+            //ConfigDSL.registerAdapterImpl(::ParentConfigAdapterImpl)
             startActivity(Intent(this, QuickStartActivity::class.java))
         } else {
+            if (GlobalApplication.lastStageValue != null)
+                binding.textViewLoadStatus.text = "✦ ${GlobalApplication.lastStageValue}"
             init()
         }
     }
@@ -94,9 +95,9 @@ class SplashActivity : AppCompatActivity() {
         val restartJob = lifecycleScope.launch(start = CoroutineStart.LAZY) {
             delay(7000L)
             when(ApplicationSession.initState) {
-                ApplicationSession.InitState.None ->
+                Session.InitState.None ->
                     restartApplication()
-                ApplicationSession.InitState.Done -> {
+                Session.InitState.Done -> {
                     if (lifecycle.currentState == Lifecycle.State.STARTED)
                         startApplication(initMillis)
                 }
@@ -104,23 +105,25 @@ class SplashActivity : AppCompatActivity() {
             }
         }
 
-        startupJob = lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenCreated {
             if (GlobalApplication.isStartupAborted)
                 return@launchWhenCreated
             if (ApplicationSession.isInitComplete) {
                 startApplication(initMillis)
             } else {
                 restartJob.start()
-                EventHandler.on<ApplicationEvent.Session.StageUpdate>(this, replay = 3) {
+                EventHandler.on<ApplicationEvent.Session.StageUpdate>(this) {
+                    if (value == null) {
+                        startApplication(initMillis)
+                        return@on
+                    }
                     if (restartJob.isActive)
                         restartJob.cancel()
-                    value?.let {
-                        println("------------------------ $value")
-                        LOG.info { value }
-                        runOnUiThread {
-                            binding.textViewLoadStatus.text = "✦ $value"
-                        }
-                    } ?: startApplication(initMillis)
+                    println("------------------------ $value")
+                    LOG.info { value }
+                    withContext(Dispatchers.Main) {
+                        binding.textViewLoadStatus.text = "✦ $value"
+                    }
                 }
             }
         }
