@@ -272,8 +272,6 @@ internal fun getNoobSettingStruct() = config {
         id = "general"
         title = "일반"
         textColor = mainColor
-        icon = Icon.SETTINGS
-        iconTintColor = color { "#5584AC" }
         items {
             toggle {
                 id = "global_power"
@@ -314,8 +312,6 @@ internal fun getNoobSettingStruct() = config {
         id = "project"
         title = "프로젝트"
         textColor = mainColor
-        icon = Icon.PROJECTS
-        iconTintColor = color { "#B4CFB0" }
         items {
             toggle {
                 id = "compile_animation"
@@ -331,8 +327,6 @@ internal fun getNoobSettingStruct() = config {
         id = "notifications"
         title = "알림, 이벤트"
         textColor = mainColor
-        icon = Icon.NOTIFICATIONS
-        iconTintColor = color { "#98BAE7" }
         items {
             button {
                 id = "read_noti_perm"
