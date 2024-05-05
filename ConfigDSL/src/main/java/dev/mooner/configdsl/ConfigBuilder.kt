@@ -100,7 +100,7 @@ class ConfigBuilder {
                 title = title ?: "",
                 flags = flags,
                 textColor = textColor,
-                items = items
+                childOptions = items
             )
         }
     }

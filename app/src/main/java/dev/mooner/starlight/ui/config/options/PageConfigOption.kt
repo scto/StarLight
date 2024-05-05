@@ -29,9 +29,9 @@ class PageConfigOption(
     override val description: String?,
     override val icon       : IconInfo,
     override val default    : MutableDataMapEntry = hashMapOf(),
-    val content: ConfigStructure,
+    override val childOptions: ConfigStructure,
     private val isRootOption: Boolean = false,
-): RootConfigOption<PageConfigOption.PageViewHolder, MutableDataMapEntry>(content) {
+): RootConfigOption<PageConfigOption.PageViewHolder, MutableDataMapEntry>() {
 
     override val dependency : String? = null
 
@@ -52,15 +52,6 @@ class PageConfigOption(
 
     override fun onDraw(holder: PageViewHolder, data: MutableDataMapEntry) {
         val preprocessed = preprocessData(data)
-
-        println("PageConfigOption data ~~~~~")
-        for ((id, entry) in preprocessed) {
-            println("$id ~~")
-            for ((key, value) in entry)
-                println("\t $key: $value")
-        }
-        println("~~~~~~~~~~~~~~~~~~~~")
-
         if (!isRootOption)
             holder.layout.updateLayoutParams<RecyclerView.LayoutParams> {
                 setMargins(0)
@@ -78,7 +69,7 @@ class PageConfigOption(
             holder.itemView.context.startConfigActivity(
                 title = title,
                 subTitle = description ?: "설정",
-                struct = content,
+                struct = childOptions,
                 saved = preprocessed,
                 onValueUpdated = { parentId, id, value, jsonValue ->
                     if (isRootOption) {
@@ -103,7 +94,7 @@ class PageConfigOption(
             return description
 
         if (id !in descCache)
-            descCache[id] = content
+            descCache[id] = childOptions
                 .filterIsInstance<CategoryConfigOption>()
                 .map { it.childOptions.map { item -> item.title } }
                 .flatten()
@@ -155,7 +146,7 @@ class PageConfigBuilder(
             textColor    = textColor,
             icon         = IconInfo.auto(icon, iconFile, iconResId, iconTintColor),
             default      = default,
-            content      = structure,
+            childOptions      = structure,
             isRootOption = isRootOption,
         )
     }
@@ -196,7 +187,7 @@ class SingleCategoryPageBuilder(
             textColor    = textColor,
             icon         = IconInfo.auto(icon, iconFile, iconResId, iconTintColor),
             default      = default,
-            content      = actualStructure,
+            childOptions      = actualStructure,
             isRootOption = isRootOption,
         )
     }

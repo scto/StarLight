@@ -95,9 +95,9 @@ data class IconInfo(
     }
 }
 
-abstract class RootConfigOption<VH: BaseViewHolder, T: Any>(
-    open val childOptions: List<ConfigOption<*, *>>,
-): ConfigOption<VH, T>() {
+abstract class RootConfigOption<VH: BaseViewHolder, T: Any>: ConfigOption<VH, T>() {
+
+    abstract val childOptions: List<ConfigOption<*, *>>
 
     override val hasError: Boolean
         get() = childOptions.any(ConfigOption<*, *>::hasError)

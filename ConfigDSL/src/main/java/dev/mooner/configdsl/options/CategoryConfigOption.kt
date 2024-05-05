@@ -27,13 +27,13 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 
 class CategoryConfigOption(
-    override val id         : String,
-    override val title      : String,
-             val flags      : Int = FLAG_NONE,
+    override val id          : String,
+    override val title       : String,
+             val flags       : Int = FLAG_NONE,
              @ColorInt
-             val textColor  : Int?,
-    items: List<ConfigOption<*, *>>
-): RootConfigOption<CategoryConfigOption.CategoryViewHolder, MutableMap<String, JsonElement>>(items) {
+             val textColor   : Int?,
+    override val childOptions: List<ConfigOption<*, *>>
+): RootConfigOption<CategoryConfigOption.CategoryViewHolder, MutableMap<String, JsonElement>>() {
 
     val isDevModeOnly get() = flags hasFlag FLAG_DEV_MODE_ONLY
 
