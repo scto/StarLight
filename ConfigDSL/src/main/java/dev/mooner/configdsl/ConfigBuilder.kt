@@ -84,22 +84,6 @@ class ConfigBuilder {
         var textColor: Int? = null
         var flags: Int = CategoryConfigOption.FLAG_NONE
 
-        var icon: Icon? = null
-        var iconFile: File? = null
-        @DrawableRes
-        var iconResId: Int? = null
-
-        @ColorInt
-        var iconTintColor: Int? = null
-
-        fun setIcon(icon: Icon? = null, iconFile: File? = null, @DrawableRes iconResId: Int? = null) {
-            when {
-                icon != null -> this.icon = icon
-                iconFile != null -> this.iconFile = iconFile
-                iconResId != null -> this.iconResId = iconResId
-            }
-        }
-
         var items: List<ConfigOption<*, *>> = arrayListOf()
 
         @ConfigBuilderDsl
@@ -114,7 +98,6 @@ class ConfigBuilder {
             return CategoryConfigOption(
                 id = id,
                 title = title ?: "",
-                icon = IconInfo.auto(icon, iconFile, iconResId, iconTintColor),
                 flags = flags,
                 textColor = textColor,
                 items = items

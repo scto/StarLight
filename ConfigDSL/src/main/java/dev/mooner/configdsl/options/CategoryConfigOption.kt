@@ -32,12 +32,12 @@ class CategoryConfigOption(
              val flags      : Int = FLAG_NONE,
              @ColorInt
              val textColor  : Int?,
-    override val icon       : IconInfo,
     items: List<ConfigOption<*, *>>
 ): RootConfigOption<CategoryConfigOption.CategoryViewHolder, MutableMap<String, JsonElement>>(items) {
 
     val isDevModeOnly get() = flags hasFlag FLAG_DEV_MODE_ONLY
 
+    override val icon        : IconInfo = IconInfo.none()
     override val default     : MutableMap<String, JsonElement> = hashMapOf()
     override val description : String? = null
     override val dependency  : String? = null
