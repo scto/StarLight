@@ -2,7 +2,6 @@ package dev.mooner.starlight.ui.splash
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
@@ -10,13 +9,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import coil.Coil
 import coil.ImageLoader
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
-import coil.load
-import coil.request.repeatCount
 import dev.mooner.starlight.MainActivity
 import dev.mooner.starlight.PREF_IS_INITIAL
-import dev.mooner.starlight.R
 import dev.mooner.starlight.core.ApplicationSession
 import dev.mooner.starlight.core.GlobalApplication
 import dev.mooner.starlight.databinding.ActivitySplashBinding
@@ -58,6 +52,7 @@ class SplashActivity : AppCompatActivity() {
         val isPermissionsGrant = checkPermissions(SetPermissionFragment.REQUIRED_PERMISSIONS)
 
         val imageLoader = ImageLoader.Builder(applicationContext)
+            /*
             .components {
                 if (SDK_INT >= 28) {
                     add(ImageDecoderDecoder.Factory())
@@ -65,10 +60,9 @@ class SplashActivity : AppCompatActivity() {
                     add(GifDecoder.Factory())
                 }
             }
+             */
             .build()
         Coil.setImageLoader(imageLoader)
-
-        binding.splashAnimImageView.load(R.drawable.splash_anim) { repeatCount(0) }
 
         LOG.verbose {
             """
@@ -153,7 +147,7 @@ class SplashActivity : AppCompatActivity() {
 
     companion object {
 
-        private const val MIN_LOAD_TIME = 1500L
+        private const val MIN_LOAD_TIME = 1300L
         private const val ANIMATION_DURATION = 5000L
 
         private const val TEST_QUICK_START = false

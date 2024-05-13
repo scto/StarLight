@@ -92,7 +92,8 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0"
 
     implementation "io.coil-kt:coil:$coil_version"
-    implementation "io.coil-kt:coil-gif:$coil_version"
+    //implementation "io.coil-kt:coil-gif:$coil_version"
+    implementation "com.airbnb.android:lottie:6.4.0"
 
     implementation "com.afollestad.material-dialogs:core:3.3.0"
     implementation "com.afollestad.material-dialogs:input:3.3.0"
