@@ -79,7 +79,17 @@ class JSRhino: Language() {
         return object : RhinoAndroidHelper(File(System.getProperty("java.io.tmpdir", "."), "classes")) {
             override fun createAndroidContextFactory(cacheDirectory: File?): AndroidContextFactory {
                 val classLoader = RuntimeClassLoader(currentThread.contextClassLoader)
-                return createAndroidContextFactory(cacheDirectory, classLoader)
+                return object : AndroidContextFactory(cacheDirectory, classLoader) {
+
+                    override fun hasFeature(cx: Context?, featureIndex: Int): Boolean {
+                        return when(featureIndex) {
+                            Context.FEATURE_ENABLE_JAVA_MAP_ACCESS ->
+                                true
+                            else ->
+                                super.hasFeature(cx, featureIndex)
+                        }
+                    }
+                }
             }
         }
     }
