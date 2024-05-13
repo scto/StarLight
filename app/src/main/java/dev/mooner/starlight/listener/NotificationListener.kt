@@ -364,7 +364,7 @@ class NotificationListener: NotificationListenerService() {
             ?.getBoolean("use_legacy_event", legacyEvent)
             ?: legacyEvent
         useNPostedEvent = GlobalConfig
-            .category("beta_features")
+            .category("notifications")
             .getSubCategory("noti")
             ?.getBoolean("use_on_notification_posted", useNPostedEvent)
             ?: useNPostedEvent
