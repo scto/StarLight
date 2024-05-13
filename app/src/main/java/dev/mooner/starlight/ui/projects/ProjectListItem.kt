@@ -15,7 +15,6 @@ import android.widget.ImageButton
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import coil.load
-import coil.transform.RoundedCornersTransformation
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.fastadapter.binding.AbstractBindingItem
@@ -47,7 +46,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.decodeFromJsonElement
-import java.io.File
 import java.lang.ref.WeakReference
 import dev.mooner.starlight.ui.projects.info.startProjectInfoActivity as mStartProjectInfoActivity
 
@@ -371,7 +369,7 @@ class ProjectListItem(
         //val tint = if (icon == null) R.color.main_bright else null
         setIcon {
             it.load(icon ?: R.drawable.ic_round_developer_mode_24) {
-                transformations(RoundedCornersTransformation(context.resources.getDimension(R.dimen.lang_icon_corner_radius)))
+                //transformations(RoundedCornersTransformation(context.resources.getDimension(R.dimen.lang_icon_corner_radius)))
             }
         }
         /*
