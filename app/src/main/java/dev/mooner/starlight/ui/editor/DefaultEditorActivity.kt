@@ -86,7 +86,7 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
     private var fileTreeDrawer : FileTreeDrawerFragment? = null
 
     private var showFileTree   : Boolean by notNull()
-    private var showDebugChat  : Boolean by notNull()
+    //private var showDebugChat  : Boolean by notNull()
 
     private var bypassEscape   : Boolean by notNull()
 
@@ -106,8 +106,10 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
             !log.message.startsWith("ECOMF: ")
         }
 
+        val project = getProject()
+
         showFileTree  = intent.getBooleanExtra(EXTRA_SHOW_FILE_TREE, true)
-        showDebugChat = intent.getBooleanExtra(EXTRA_SHOW_DEBUG_CHAT, true)
+        //showDebugChat = intent.getBooleanExtra(EXTRA_SHOW_DEBUG_CHAT, true)
 
         name = intent.getStringExtra("title")!!
         supportActionBar!!.apply {
@@ -116,8 +118,7 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
                 setHomeAsUpIndicator(R.drawable.ic_round_menu_24)
             }
 
-            if (showDebugChat)
-                setDisplayShowHomeEnabled(true)
+            setDisplayShowHomeEnabled(true)
 
             title = name
         }
@@ -159,14 +160,14 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
             override fun onDrawerStateChanged(newState: Int) {}
         })
 
-        if (showDebugChat && layoutMode == LAYOUT_TABLET) {
+        if (getProject() != null && layoutMode == LAYOUT_TABLET) {
             // Left drawer (Debug Chat)
             //binding.debugChat!!.leave.visibility = View.INVISIBLE
             supportFragmentManager.beginTransaction().apply {
                 replace(
                     R.id.fragment_container_debug_room,
                     DebugRoomFragment.newInstance(
-                        projectName = getProject().info.name,
+                        projectName = getProject()!!.info.name,
                         showLeave = false,
                         fixedPadding = true
                     )
@@ -181,7 +182,7 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
         if (showFileTree) {
             //Right drawer (File Tree)
             fileTreeDrawer = FileTreeDrawerFragment
-                .newInstance(getProject())
+                .newInstance(getBaseDirectory(), getProject())
             supportFragmentManager.beginTransaction().apply {
                 replace(
                     R.id.drawer_fileTree,
@@ -207,7 +208,7 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
             }
         }.build()
 
-        val fileName = getProject().info.mainScript
+        val fileName = project?.info?.mainScript ?: getMainFileName()
         mainScriptName = fileName
         val ext = File(fileName).extension
         val lang = let {
@@ -236,12 +237,14 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
             finish()
         }
 
-        readCodeOrDefault(fileName, getProject().getLanguage())
+        //readCodeOrDefault(fileName, getProject().getLanguage())
         val savedTabs: Collection<String> =
-            getProject().config.category("editor")
-                .getString("saved_tabs", "[]")
-                .let<_, MutableList<String>>(json::decodeFromString)
-                .also { if (fileName in it) it -= fileName }
+            project?.config
+                ?.category("editor")
+                ?.getString("saved_tabs", "[]")
+                ?.let<_, MutableList<String>>(json::decodeFromString)
+                ?.also { if (fileName in it) it -= fileName }
+                ?: emptyList()
 
         addSession(fileName, lang, code)
         for (tab in savedTabs) {
@@ -297,9 +300,11 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
     }
 
     override fun onDestroy() {
-        getProject().config.edit {
-            val str = Json.encodeToString(sessions.map { it.fileName })
-            category("editor").setString("saved_tabs", str)
+        getProject()?.let { proj ->
+            proj.config.edit {
+                val str = Json.encodeToString(sessions.map { it.fileName })
+                category("editor").setString("saved_tabs", str)
+            }
         }
 
         codeView?.destroy()
@@ -318,10 +323,16 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
         val superRes = super.onPrepareOptionsMenu(menu)
         val iconColor = ColorStateList.valueOf(getTextColor(theme.isTextDark))
         for (idx in 0 until menu.size()) {
+            val item = menu[idx]
             if (Build.VERSION.SDK_INT < 26)
-                menu[idx].icon?.setTintList(iconColor)
+                item.icon?.setTintList(iconColor)
             else
-                menu[idx].iconTintList = iconColor
+                item.iconTintList = iconColor
+
+            if (item.itemId == R.id.menu_debug_room && getProject() == null)
+                item.isVisible = false
+            if (item.itemId == R.id.menu_recompile && getProject() == null)
+                item.isVisible = false
         }
         return superRes
     }
@@ -431,14 +442,14 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
 
     fun openFile(file: File) {
         //val relativePath =
-        val parentPath = getProject().directory.path
+        val parentPath = getBaseDirectory().path
         val filePath = file.path
 
         if (!filePath.startsWith(parentPath)) {
             logger.error {
                 translate {
-                    Locale.ENGLISH { "Requested file [$filePath] is not a child of project path." }
-                    Locale.KOREAN  { "요청한 파일 [$filePath]은 프로젝트의 하위 폴더가 아닙니다." }
+                    Locale.ENGLISH { "Requested file [$filePath] is not a child of base path [${parentPath}]." }
+                    Locale.KOREAN  { "요청한 파일 [$filePath]은 기본 경로 [${parentPath}]의 하위 폴더가 아닙니다." }
                 }
             }
             return
@@ -482,7 +493,7 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
 
     private fun compileProject() {
         saveCode()
-        val project = getProject()
+        val project = getProject() ?: return
 
         val peek = createSimplePeek(
             text = translate {
@@ -500,7 +511,7 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
         peek.peek()
 
         lifecycleScope.launch {
-            getProject()
+            project
                 .compileAsync()
                 .onCompletion { e ->
                     if (e != null)
@@ -535,7 +546,7 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
                         setTextTypeface(getTypeface(this@DefaultEditorActivity, R.font.wantedsans_regular)!!)
                         setTextSize(12f)
                         setAction("자세히", textColorRes = R.color.black) {
-                            binding.root.context.showErrorLogDialog(getProject().info.name + " 에러 로그", e)
+                            binding.root.context.showErrorLogDialog(project.info.name + " 에러 로그", e)
                         }
                         setBackgroundColor(res = R.color.code_error)
                     }.peek()
@@ -934,7 +945,8 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
             R.id.menu_recompile -> compileProject()
             R.id.code_beautify -> beautifyCode()
             R.id.menu_debug_room -> {
-                if (!getProject().isCompiled) {
+                val project = getProject() ?: return false
+                if (!project.isCompiled) {
                     createPeek(translate {
                         Locale.ENGLISH { "Project isn't compiled yet." }
                         Locale.KOREAN  { "아직 프로젝트가 컴파일 되지 않았어요." }
@@ -949,7 +961,7 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
                         LAYOUT_TABLET -> openDebugRoomDrawer()
                         LAYOUT_DEFAULT -> startActivityWithExtra(
                             DebugRoomActivity::class.java,
-                            mapOf(DebugRoomActivity.EXTRA_PROJECT_NAME to getProject().info.name)
+                            mapOf(DebugRoomActivity.EXTRA_PROJECT_NAME to project.info.name)
                         )
                     }
                 }
@@ -976,10 +988,9 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
     }
 
     companion object {
-        const val EXTRA_SHOW_FILE_TREE  = "showFileTree"
-        const val EXTRA_SHOW_DEBUG_CHAT = "showDebugChat"
+        const val EXTRA_SHOW_FILE_TREE = "showFileTree"
+        const val ENTRY_POINT          = "file:///android_asset/editor/index.html"
 
-        const val ENTRY_POINT = "file:///android_asset/editor/index.html"
         private const val HOT_KEYS = "↺↻⇒[]{}()<>;=.'\"+-*/\\:&|"
         private val DEFAULT_THEME = Theme.TOMORROW_NIGHT_EIGHTIES
     }

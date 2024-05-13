@@ -12,6 +12,7 @@ import dev.mooner.starlight.databinding.FragmentFileTreeDrawerBinding
 import dev.mooner.starlight.plugincore.logger.LoggerFactory
 import dev.mooner.starlight.plugincore.project.Project
 import dev.mooner.starlight.plugincore.utils.getStarLightDirectory
+import java.io.File
 import kotlin.properties.Delegates.notNull
 
 private val logger = LoggerFactory.logger {  }
@@ -22,14 +23,14 @@ class FileTreeDrawerFragment : Fragment() {
     val binding get() = _binding!!
 
     private var projectPath: String by notNull()
-    private var projectId: String by notNull()
+    private var projectId: String? = null
     private var mainScript: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         projectPath = arguments?.getString(ARG_PROJECT_PATH) ?: getStarLightDirectory().path
-        projectId   = arguments?.getString(ARG_PROJECT_ID) ?: error("Failed to retrieve project id")
+        projectId   = arguments?.getString(ARG_PROJECT_ID)
         mainScript  = arguments?.getString(ARG_MAIN_SCRIPT)
         logger.verbose { "File tree path: $projectPath, mainScript: $mainScript" }
     }
@@ -70,7 +71,8 @@ class FileTreeDrawerFragment : Fragment() {
         setOnTabSelectedListener { id ->
             val index = when(id) {
                 R.id.nav_file_tree -> 0
-                R.id.nav_logs -> 1
+                R.id.nav_logs ->
+                    if (projectId == null) return@setOnTabSelectedListener else 1
                 R.id.nav_warnings -> 2
                 else -> 0
             }
@@ -100,12 +102,15 @@ class FileTreeDrawerFragment : Fragment() {
         private const val ARG_MAIN_SCRIPT  = "mainScript"
 
         @JvmStatic
-        fun newInstance(project: Project) =
+        fun newInstance(basePath: File, project: Project?) =
             FileTreeDrawerFragment().apply {
                 arguments = Bundle().apply {
-                    putString(ARG_PROJECT_PATH, project.directory.path)
-                    putString(ARG_PROJECT_ID, project.info.id.toString())
-                    putString(ARG_MAIN_SCRIPT, project.info.mainScript)
+                    putString(ARG_PROJECT_PATH, basePath.path)
+
+                    if (project != null) {
+                        putString(ARG_PROJECT_ID, project.info.id.toString())
+                        putString(ARG_MAIN_SCRIPT, project.info.mainScript)
+                    }
                 }
             }
     }

@@ -11,29 +11,39 @@ import kotlin.properties.Delegates.notNull
 
 abstract class CodeEditorActivity: AppCompatActivity() {
 
-    private var baseDirectory: File by notNull()
-    private var mProject: Project by notNull()
+    private var mBaseDirectory: File by notNull()
+    private var mainFile: String by notNull()
+    private var mProject: Project? = null
 
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val baseDirectoryPath = intent.getStringExtra(KEY_BASE_DIRECTORY)
             ?: error("Failed to retrieve base directory path")
-        baseDirectory = File(baseDirectoryPath).also {
+        mBaseDirectory = File(baseDirectoryPath).also {
             require(it.isValidDirectory()) {
                 "Target file '${baseDirectoryPath}' isn't a valid file" }
         }
 
+        mainFile = intent.getStringExtra(KEY_MAIN_FILE)
+            ?: error("Failed to retrieve main file")
+
         val projectName = intent.getStringExtra(KEY_PROJECT_NAME)
-            ?: error("Failed to retrieve project name")
-        mProject = Session.projectManager.getProject(projectName)
-            ?: error("Failed to find project with name '$projectName'")
+
+        if (!projectName.isNullOrBlank()) {
+            mProject = Session.projectManager.getProject(projectName)
+                ?: error("Failed to find project with name '$projectName'")
+        }
     }
 
-    protected fun getProject(): Project = mProject
+    protected fun getProject(): Project? = mProject
+
+    protected fun getBaseDirectory(): File = mBaseDirectory
+
+    protected fun getMainFileName(): String = mainFile
 
     protected fun readCode(fileName: String): String? {
-        val targetFile = baseDirectory.resolve(fileName).also {
+        val targetFile = mBaseDirectory.resolve(fileName).also {
             if (!it.isValidFile()) return null
         }
 
@@ -48,7 +58,7 @@ abstract class CodeEditorActivity: AppCompatActivity() {
         readCode(fileName) ?: language.formatDefaultCode(fileName, emptyList())
 
     protected fun saveCode(fileName: String, code: String): Boolean {
-        val targetFile = baseDirectory.resolve(fileName).also {
+        val targetFile = mBaseDirectory.resolve(fileName).also {
             if (!it.isValidFile()) return false
         }
 
@@ -68,6 +78,7 @@ abstract class CodeEditorActivity: AppCompatActivity() {
 
     companion object {
         const val KEY_BASE_DIRECTORY = "base_directory"
+        const val KEY_MAIN_FILE      = "main_file"
         const val KEY_PROJECT_NAME   = "project_name"
     }
 }

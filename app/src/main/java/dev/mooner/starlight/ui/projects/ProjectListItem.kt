@@ -273,7 +273,7 @@ class ProjectListItem(
             mapOf(
                 CodeEditorActivity.KEY_BASE_DIRECTORY to project.directory.path,
                 CodeEditorActivity.KEY_PROJECT_NAME   to project.info.name,
-                "fileDir" to File(project.directory, project.info.mainScript).path,
+                CodeEditorActivity.KEY_MAIN_FILE      to project.info.mainScript,
                 "title"   to project.info.name
             )
         )
