@@ -14,6 +14,7 @@ import androidx.core.content.edit
 import dev.mooner.configdsl.Icon
 import dev.mooner.configdsl.config
 import dev.mooner.configdsl.options.button
+import dev.mooner.configdsl.options.spinner
 import dev.mooner.configdsl.options.toggle
 import dev.mooner.starlight.R
 import dev.mooner.starlight.WIDGET_DEF_STRING
@@ -46,6 +47,7 @@ fun Context.startDevModeActivity() {
                         iconTintColor = color { "#87AAAA" }
                         defaultValue = false
                     }
+                    /*
                     toggle {
                         dependency = "show_internal_log"
                         id = "append_internal_log"
@@ -54,6 +56,15 @@ fun Context.startDevModeActivity() {
                         icon = Icon.EDIT
                         iconTintColor = color { "#87AAAA" }
                         defaultValue = false
+                    }
+                     */
+                    spinner {
+                        id = "update_channel"
+                        title = "업데이트 확인 채널"
+                        description = "최신 버전을 확인할 채널을 설정합니다."
+                        icon = Icon.BRANCH
+                        items = VersionChecker.Channel.entries.map(VersionChecker.Channel::name)
+                        defaultIndex = VersionChecker.Channel.STABLE.ordinal
                     }
                     button {
                         id = "make_error"

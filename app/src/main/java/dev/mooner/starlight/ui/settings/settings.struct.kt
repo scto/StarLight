@@ -25,6 +25,7 @@ import dev.mooner.configdsl.options.toggle
 import dev.mooner.peekalert.PeekAlert
 import dev.mooner.starlight.R
 import dev.mooner.starlight.plugincore.config.GlobalConfig
+import dev.mooner.starlight.plugincore.logger.LoggerFactory
 import dev.mooner.starlight.plugincore.translation.Locale
 import dev.mooner.starlight.plugincore.translation.translate
 import dev.mooner.starlight.ui.config.options.page
@@ -40,6 +41,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import java.io.File
+
+private val logger = LoggerFactory.logger {  }
 
 context(SettingsFragment)
 internal fun getSettingsStruct() = config {
@@ -406,8 +409,14 @@ private fun checkUpdate() {
     }.peek()
 
     lifecycleScope.launch {
+        val channel = GlobalConfig
+            .category("dev_mode_config")
+            .getInt("update_channel", VersionChecker.Channel.STABLE.ordinal)
+            .let(VersionChecker.Channel.entries::get)
+        logger.debug { "update check channel= $channel" }
+
         val version = withContext(Dispatchers.IO) {
-            VersionChecker().fetchVersion(VersionChecker.Channel.BETA)
+            VersionChecker().fetchVersion(channel)
         }
         if (version == null) {
             createSimplePeek(
