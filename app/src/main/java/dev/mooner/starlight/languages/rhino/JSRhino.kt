@@ -53,8 +53,6 @@ class JSRhino: Language() {
             %BODY%
         """.trimIndent()
 
-    //override fun onConfigUpdated(updated: Map<String, Any>) {}
-
     internal fun enterContext(): Context {
         val config = getLanguageConfig()
         val optLevel = if (config.getBoolean(CONF_OPTIMIZE_CODE, false))
@@ -93,8 +91,6 @@ class JSRhino: Language() {
         else
             context.initStandardObjects(ImporterTopLevel(context))
 
-        //val scope = context.newObject(shared)
-        //val engine = ScriptEngineManager().getEngineByName("rhino")!!
         if (project != null) {
             var importLines: StringBuilder? = null
             for(api in apis) {
@@ -105,24 +101,19 @@ class JSRhino: Language() {
                             importLines = StringBuilder(line)
                         else
                             importLines.append(line)
-                        //context.evaluateString(scope, "const ${methodBlock.name} = ${methodBlock.instanceClass.name};", "import", 1, null)
                     }
                     InstanceType.OBJECT -> {
                         val instance = api.getInstance(project)
                         scope.put(api.name, scope, instance)
-                        //ScriptableObject.putProperty(scope, methodBlock.name, Context.javaToJS(instance, scope))
                     }
                 }
-                //engine.put(methodBlock.blockName, methodBlock.instance)
             }
-            if (importLines != null) {
-                //Logger.v(importLines.toString())
+            if (importLines != null)
                 context.evaluateString(scope, importLines.toString(), "import", 1, null)
-            }
         }
 
         val langConf = getLanguageConfig()
-        if (langConf.getBoolean("load_ext_modules", false) || isNoobMode) {
+        if (langConf.getBoolean("load_ext_modules", true) || isNoobMode) {
             LOG.verboseTranslated {
                 Locale.ENGLISH { "[Load external modules] Option enabled" }
                 Locale.KOREAN  { "[외부 모듈 로드] 설정 활성화됨" }
@@ -132,9 +123,7 @@ class JSRhino: Language() {
             require.install(scope)
         }
 
-        //engine.eval(code)
         context.evaluateString(scope, code, project?.info?.name ?: name, 1, null)
-        //scope.put()
         Context.exit()
         return scope
     }
@@ -175,8 +164,6 @@ class JSRhino: Language() {
         val result = context.evaluateString(scope, code, "eval", 0, null)
         Context.exit()
         return result
-        //val engine = ScriptEngineManager().getEngineByName("rhino")!!
-        //return engine.eval(code)
     }
 
     private fun indexToVersion(index: Int): Int {

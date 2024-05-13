@@ -228,7 +228,7 @@ class ProjectConfigActivity: AppCompatActivity() {
                     list {
                         id = "allowed_events"
                         title = "호출이 허용된 이벤트"
-                        description = "이 프로젝트를 호출할 수 있는 이벤트 ID 들이에요"
+                        description = "이 프로젝트를 호출할 수 있는 이벤트 ID들 이에요"
                         icon = Icon.NOTIFICATIONS_ACTIVE
                         iconTintColor = color { "#FF5C58" }
                         structure {
