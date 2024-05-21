@@ -1,0 +1,42 @@
+plugins {
+    id("com.android.library")
+    id("kotlin-android")
+    id("kotlinx-serialization")
+    id("kotlin-kapt")
+}
+
+android {
+    compileSdk = libs.versions.compileSdk.get().toInt()
+    buildToolsVersion = libs.versions.buildTools.get()
+
+    defaultConfig {
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
+
+        consumerProguardFiles("consumer-rules.pro")
+    }
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    namespace = "dev.mooner.starlight.plugincore"
+}
+
+dependencies {
+    api(libs.bundles.androidx)
+    api(libs.bundles.kotlin)
+    api(projects.configDSL)
+}
