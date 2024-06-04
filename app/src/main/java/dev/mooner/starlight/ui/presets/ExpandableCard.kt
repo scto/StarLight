@@ -280,7 +280,7 @@ class ExpandableCard @JvmOverloads constructor(context: Context, attrs: Attribut
         return totalHeight
     }
 
-    fun setIcon(@DrawableRes drawableRes: Int = -1, drawable: Drawable? = null, loader: ((ImageView) -> Unit)?) {
+    fun setIcon(@DrawableRes drawableRes: Int = -1, drawable: Drawable? = null, loader: ((ImageView) -> Unit)? = null) {
         if (drawableRes != -1) {
             iconDrawable = ContextCompat.getDrawable(context, drawableRes)
             binding.cardIcon.load(iconDrawable)

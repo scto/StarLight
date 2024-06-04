@@ -50,7 +50,8 @@ class PluginsListAdapter(
                         transformations(RoundedCornersTransformation(context.resources.getDimension(R.dimen.lang_icon_corner_radius)))
                     }
                 }
-            }
+            } else
+                setIcon(R.drawable.ic_round_plugins_24)
 
             setOnInnerViewInflateListener {
 
