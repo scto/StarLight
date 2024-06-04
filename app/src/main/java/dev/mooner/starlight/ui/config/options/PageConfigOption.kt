@@ -73,7 +73,6 @@ class PageConfigOption(
                 saved = preprocessed,
                 onValueUpdated = { parentId, id, value, jsonValue ->
                     if (isRootOption) {
-                        println("publishRootUpdate $parentId\$$id $value $jsonValue")
                         if (parentId == "default")
                             publishRootUpdate(id, value, jsonValue)
                         else {

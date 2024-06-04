@@ -99,5 +99,14 @@ class ParentConfigAdapter(
             }
             option.init(eventPublisher)
         }
+
+        eventFlow
+            .filterIsInstance<ConfigOption.RootUpdateData>()
+            .onEach { data ->
+                configData[data.rootId]?.also { ent ->
+                    ent[data.provider] = data.jsonData
+                }
+            }
+            .launchIn(eventScope)
     }
 }

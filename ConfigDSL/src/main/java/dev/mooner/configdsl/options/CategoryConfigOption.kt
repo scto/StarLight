@@ -19,7 +19,7 @@ import dev.mooner.configdsl.utils.hasFlag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.json.JsonElement
@@ -72,13 +72,13 @@ class CategoryConfigOption(
             layoutManager = mLayoutManager
         }
         childAdapter.eventFlow
-            .filterNot { it.provider.startsWith("dep:") && it.provider.startsWith("redraw:") }
+            .filterIsInstance<ValueUpdateData>()
             .onEach {
-                //configData.computeIfAbsent(id) { hashMapOf() }[it.provider] = it.jsonData
-                tryEmitData(EventData(
-                    id + ":" + it.provider,
-                    it.data,
-                    it.jsonData
+                tryEmitData(RootUpdateData(
+                    rootId   = id,
+                    provider = it.provider,
+                    data     = it.data,
+                    jsonData = it.jsonData
                 ))
             }
             .launchIn(eventScope)

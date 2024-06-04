@@ -14,7 +14,6 @@ import coil.load
 import coil.size.Scale
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonNull
 import java.io.File
 
 typealias ConfigStructure = List<RootConfigOption<*, *>>
@@ -103,8 +102,9 @@ abstract class RootConfigOption<VH: BaseViewHolder, T: Any>: ConfigOption<VH, T>
         get() = childOptions.any(ConfigOption<*, *>::hasError)
 
     fun publishRootUpdate(childId: String, value: Any, jsonValue: JsonElement): Boolean =
-        tryEmitData(EventData(
-            provider = "$id:$childId",
+        tryEmitData(RootUpdateData(
+            rootId   = id,
+            provider = childId,
             data     = value,
             jsonData = jsonValue
         ))
@@ -144,33 +144,62 @@ abstract class ConfigOption<VH: BaseViewHolder, T: Any> {
         _eventFlow?.tryEmit(data) ?: false
 
     protected fun notifyUpdated(value: T): Boolean =
-        tryEmitData(EventData(
+        tryEmitData(ValueUpdateData(
             provider = id,
             data     = value,
             jsonData = dataToJson(value)
         ))
 
     protected fun notifyDependencyUpdated(value: Boolean): Boolean =
-        tryEmitData(EventData(
-            provider = "dep:${id}",
+        tryEmitData(DependencyUpdateData(
+            provider = id,
             data     = value,
-            jsonData = JsonNull
         ))
 
     protected fun requestViewUpdate(): Boolean =
-        tryEmitData(EventData(
-            provider = "redraw:${id}",
-            data     = false,
-            jsonData = JsonNull
+        tryEmitData(RedrawRequestData(
+            provider = id
         ))
 
-    class EventData(
-        val provider: String,
+    interface EventData {
+        val provider: String
+    }
+
+    data class RootUpdateData(
+        val rootId: String,
+        override val provider: String,
+        val data: Any,
+        val jsonData: JsonElement
+    ): EventData {
+        override fun toString(): String {
+            return "ValueUpdateData($rootId->$provider: $data($jsonData))"
+        }
+    }
+
+    data class ValueUpdateData(
+        override val provider: String,
         val data    : Any,
         val jsonData: JsonElement,
-    ) {
+    ): EventData {
         override fun toString(): String {
-            return "EventData($provider: $data($jsonData))"
+            return "ValueUpdateData($provider: $data($jsonData))"
+        }
+    }
+
+    data class DependencyUpdateData(
+        override val provider: String,
+        val data: Boolean,
+    ): EventData {
+        override fun toString(): String {
+            return "DependencyUpdateData($provider: $data)"
+        }
+    }
+
+    data class RedrawRequestData(
+        override val provider: String,
+    ): EventData {
+        override fun toString(): String {
+            return "RedrawRequestData($provider)"
         }
     }
 }

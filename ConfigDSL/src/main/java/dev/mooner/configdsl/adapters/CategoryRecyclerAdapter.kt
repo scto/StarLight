@@ -112,12 +112,10 @@ class CategoryRecyclerAdapter(
             }
             eventPublisher
                 .buffer()
-                .filter { it.provider == "dep:${actualDepID}" }
+                .filterIsInstance<ConfigOption.DependencyUpdateData>()
                 .onEach { event ->
-                    if (event.data !is Boolean)
-                        return@onEach
-                    holder.setEnabled(event.data as Boolean xor isInverted)
-                    option.setEnabled(event.data as Boolean xor isInverted)
+                    holder.setEnabled(event.data xor isInverted)
+                    option.setEnabled(event.data xor isInverted)
                 }
                 .flowOn(Dispatchers.Main)
                 .launchIn(eventScope)

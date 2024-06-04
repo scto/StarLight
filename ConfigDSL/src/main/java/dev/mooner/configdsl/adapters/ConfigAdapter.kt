@@ -18,6 +18,7 @@ import dev.mooner.configdsl.MutableDataMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.json.JsonElement
@@ -44,10 +45,11 @@ class ConfigAdapter private constructor(
 
     val hasError get() = parentAdapter?.isHavingError == true
 
-    fun onEvent(callback: suspend (data: ConfigOption.EventData) -> Unit) {
+    fun onEvent(callback: suspend (data: ConfigOption.RootUpdateData) -> Unit) {
         checkDestroyed()
         parentAdapter!!
             .eventFlow
+            .filterIsInstance<ConfigOption.RootUpdateData>()
             .onEach(callback)
             .launchIn(coroutineScope)
     }
@@ -127,8 +129,7 @@ class ConfigAdapter private constructor(
                 if (lifecycleOwner != null)
                     lifecycleOwner!!.lifecycle.addObserver(this)
                 onEvent { data ->
-                    val (parentId, id) = data.provider.split(":")
-                    listener(parentId, id, data.data, data.jsonData)
+                    listener(data.rootId, data.provider, data.data, data.jsonData)
                 }
             }
 

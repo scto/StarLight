@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import dev.mooner.configdsl.ConfigOption
 import dev.mooner.configdsl.adapters.ParentConfigAdapter
 import dev.mooner.starlight.databinding.ActivityConfigBinding
 import dev.mooner.starlight.event.ApplicationEvent
@@ -14,6 +15,7 @@ import dev.mooner.starlight.plugincore.logger.LoggerFactory
 import dev.mooner.starlight.utils.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -78,12 +80,17 @@ class ConfigActivity : AppCompatActivity() {
             coroutineContext = lifecycleScope.coroutineContext
         ).also(ParentConfigAdapter::notifyAllItemInserted).apply {
             eventFlow
+                .filterIsInstance<ConfigOption.RootUpdateData>()
                 .onEach { data ->
-                    val (parentId, id) = data.provider.split(":")
                     EventHandler.fireEvent(
                         ApplicationEvent.ConfigActivity.Update(
                             uuid = activityId,
-                            data = ApplicationEvent.ConfigActivity.Update.UpdatedData(parentId, id, data.data, data.jsonData)
+                            data = ApplicationEvent.ConfigActivity.Update.UpdatedData(
+                                data.rootId,
+                                data.provider,
+                                data.data,
+                                data.jsonData,
+                            )
                         )
                     )
                 }
