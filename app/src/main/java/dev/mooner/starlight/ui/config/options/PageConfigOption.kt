@@ -76,7 +76,9 @@ class PageConfigOption(
                         if (parentId == "default")
                             publishRootUpdate(id, value, jsonValue)
                         else {
-                            val contentData = preprocessed[parentId]!!
+                            val contentData = preprocessed.computeIfAbsent(parentId) {
+                                hashMapOf(id to jsonValue)
+                            }
                             publishRootUpdate(parentId, contentData, JsonObject(contentData))
                         }
                     } else {
