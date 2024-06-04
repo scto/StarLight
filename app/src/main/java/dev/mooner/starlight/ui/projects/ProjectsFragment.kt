@@ -54,7 +54,6 @@ import dev.mooner.starlight.utils.createSuccessPeek
 import dev.mooner.starlight.utils.dp
 import dev.mooner.starlight.utils.setCommonAttrs
 import dev.mooner.starlight.utils.warn
-import jp.wasabeef.recyclerview.animators.FadeInUpAnimator
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.lang.ref.WeakReference
@@ -152,7 +151,7 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
         notifyProjectAdded(event.project)
 
     private fun RecyclerView.setup(adapter: FastAdapter<ProjectListItem>) {
-        itemAnimator = FadeInUpAnimator()
+        //itemAnimator = FadeInUpAnimator()
         layoutManager = LinearLayoutManager(activity)
         this.adapter = adapter
     }
