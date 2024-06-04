@@ -8,35 +8,11 @@ package dev.mooner.starlight.plugincore.utils
 
 import dev.mooner.configdsl.DataMap
 import dev.mooner.configdsl.MutableDataMap
-import dev.mooner.starlight.plugincore.Session
+import dev.mooner.configdsl.utils.toJsonElement
 import dev.mooner.starlight.plugincore.config.data.MutableConfig
 import dev.mooner.starlight.plugincore.config.data.MutableLegacyDataMap
-import dev.mooner.starlight.plugincore.config.data.PrimitiveTypedString
-import kotlinx.serialization.json.*
-
-fun PrimitiveTypedString.toJsonElement(json: Json = Session.json): JsonElement {
-    return when(type) {
-        "String"  -> {
-            if (value.startsWith("[{")) {
-                json.decodeFromString<List<Map<String, PrimitiveTypedString>>>(value).let { legacy ->
-                    val nList: MutableList<JsonElement> = arrayListOf()
-                    for (entry in legacy) {
-                        val map = entry.mapValues { (_, value) -> value.toJsonElement() }
-                        nList += JsonObject(map)
-                    }
-                    JsonArray(nList)
-                }
-            } else
-                JsonPrimitive(value)
-        }
-        "Boolean" -> JsonPrimitive(castAs<Boolean>())
-        "Float"   -> JsonPrimitive(castAs<Float>())
-        "Int"     -> JsonPrimitive(castAs<Int>())
-        "Long"    -> JsonPrimitive(castAs<Long>())
-        "Double"  -> JsonPrimitive(castAs<Double>())
-        else -> JsonPrimitive(value)
-    }
-}
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 
 private fun transformLegacyData(legacyDataMap: MutableLegacyDataMap): MutableDataMap {
     val transformed: MutableDataMap = hashMapOf()
@@ -57,6 +33,7 @@ fun Json.decodeLegacyData(string: String): MutableDataMap {
 }
 
 fun MutableConfig.onSaveConfigAdapter(parentId: String, id: String, data: Any, jsonData: JsonElement) {
+
     edit {
         category(parentId).setRaw(id, jsonData)
     }

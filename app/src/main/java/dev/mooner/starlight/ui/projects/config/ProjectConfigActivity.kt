@@ -26,6 +26,7 @@ import dev.mooner.configdsl.MutableDataMap
 import dev.mooner.configdsl.adapters.ConfigAdapter
 import dev.mooner.configdsl.config
 import dev.mooner.configdsl.options.*
+import dev.mooner.configdsl.utils.PrimitiveTypedString
 import dev.mooner.peekalert.PeekAlert
 import dev.mooner.starlight.R
 import dev.mooner.starlight.databinding.ActivityProjectConfigBinding

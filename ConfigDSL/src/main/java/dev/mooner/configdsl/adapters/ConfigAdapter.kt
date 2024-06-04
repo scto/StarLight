@@ -46,10 +46,10 @@ class ConfigAdapter private constructor(
 
     fun onEvent(callback: suspend (data: ConfigOption.EventData) -> Unit) {
         checkDestroyed()
-        parentAdapter
-            ?.eventFlow
-            ?.onEach(callback)
-            ?.launchIn(coroutineScope)
+        parentAdapter!!
+            .eventFlow
+            .onEach(callback)
+            .launchIn(coroutineScope)
     }
 
     fun updateData(data: MutableDataMap) {

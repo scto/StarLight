@@ -23,8 +23,9 @@ import com.google.android.material.divider.MaterialDividerItemDecoration
 import dev.mooner.configdsl.*
 import dev.mooner.configdsl.adapters.ConfigAdapter
 import dev.mooner.configdsl.adapters.ListRecyclerAdapter
+import dev.mooner.configdsl.utils.PrimitiveTypedString
 import dev.mooner.configdsl.utils.setCommonAttrs
-import kotlinx.serialization.Serializable
+import dev.mooner.configdsl.utils.toJsonElement
 import kotlinx.serialization.json.*
 import kotlin.properties.Delegates.notNull
 
@@ -143,52 +144,6 @@ data class ListConfigOption(
 
     private fun createItemTouchAdapter(recyclerAdapter: ListRecyclerAdapter): ListRecyclerTouchCallback =
         ListRecyclerTouchCallback(recyclerAdapter, ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.RIGHT)
-
-    private fun PrimitiveTypedString.toJsonElement(json: Json = Json): JsonElement {
-        return when(type) {
-            "String"  -> {
-                if (value.startsWith("[{")) {
-                    json.decodeFromString<List<Map<String, PrimitiveTypedString>>>(value).let { legacy ->
-                        val nList: MutableList<JsonElement> = arrayListOf()
-                        for (entry in legacy) {
-                            val map = entry.mapValues { (_, value) -> value.toJsonElement() }
-                            nList += JsonObject(map)
-                        }
-                        JsonArray(nList)
-                    }
-                } else
-                    JsonPrimitive(value)
-            }
-            "Boolean" -> JsonPrimitive(castAs<Boolean>())
-            "Float"   -> JsonPrimitive(castAs<Float>())
-            "Int"     -> JsonPrimitive(castAs<Int>())
-            "Long"    -> JsonPrimitive(castAs<Long>())
-            "Double"  -> JsonPrimitive(castAs<Double>())
-            else -> JsonPrimitive(value)
-        }
-    }
-
-    @Serializable
-    private data class PrimitiveTypedString(
-        val type : String,
-        val value: String,
-    ) {
-        fun cast(): Any {
-            return when(type) {
-                "String" -> value
-                "Boolean" -> value.toBoolean()
-                "Float" -> value.toFloat()
-                "Int" -> value.toInt()
-                "Long" -> value.toLong()
-                "Double" -> value.toDouble()
-                //else -> Class.forName(type).cast(value)
-                else -> error("Un-castable type: $type")
-            }
-        }
-
-        @Suppress("UNCHECKED_CAST")
-        fun <T> castAs(): T = cast() as T
-    }
 
     class ListViewHolder(itemView: View): DefaultViewHolder(itemView) {
 

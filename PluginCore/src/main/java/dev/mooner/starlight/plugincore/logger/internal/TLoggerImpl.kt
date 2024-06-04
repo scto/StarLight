@@ -6,10 +6,10 @@
 
 package dev.mooner.starlight.plugincore.logger.internal
 
-import dev.mooner.starlight.plugincore.config.Flags
 import dev.mooner.starlight.plugincore.logger.LazyEval
 import dev.mooner.starlight.plugincore.logger.LogType
 import dev.mooner.starlight.plugincore.logger.TLogger
+import dev.mooner.starlight.plugincore.utils.Flags
 
 class TLoggerImpl(
     private val tag: String

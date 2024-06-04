@@ -8,12 +8,12 @@ package dev.mooner.starlight.plugincore.logger.internal
 
 import android.util.Log
 import dev.mooner.starlight.plugincore.Session
-import dev.mooner.starlight.plugincore.config.Flags
 import dev.mooner.starlight.plugincore.config.GlobalConfig
 import dev.mooner.starlight.plugincore.event.EventHandler
 import dev.mooner.starlight.plugincore.event.Events
 import dev.mooner.starlight.plugincore.logger.LogData
 import dev.mooner.starlight.plugincore.logger.LogType
+import dev.mooner.starlight.plugincore.utils.Flags
 import dev.mooner.starlight.plugincore.utils.currentThread
 import kotlinx.coroutines.*
 

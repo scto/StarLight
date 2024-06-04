@@ -33,8 +33,6 @@ object GlobalConfig: MutableConfig {
     private val file            = File(getStarLightDirectory(), FILE_NAME)
     private val fileAccessMutex = Mutex()
 
-    private var isSaved: Boolean = false
-
     override fun getData(): DataMap =
         mData
 
@@ -61,18 +59,15 @@ object GlobalConfig: MutableConfig {
     }
 
     override fun push() {
-        isSaved = true
         flushScope.launch {
             fileAccessMutex.lock()
             try {
                 val str = json.encodeToString(mData)
                 with(file) {
-                    if (!exists()) {
+                    if (!exists())
                         mkdirs()
-                    }
-                    if (!isFile) {
+                    if (!isFile)
                         deleteRecursively()
-                    }
                     writeText(str)
                 }
             } finally {

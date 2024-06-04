@@ -7,9 +7,9 @@
 package dev.mooner.starlight.plugincore.config.data
 
 import dev.mooner.configdsl.DataMap
+import dev.mooner.configdsl.utils.PrimitiveTypedString
 import dev.mooner.starlight.plugincore.config.data.category.ConfigCategory
 
-typealias LegacyDataMap        = Map<String, Map<String, PrimitiveTypedString>>
 typealias MutableLegacyDataMap = MutableMap<String, MutableMap<String, PrimitiveTypedString>>
 
 interface ConfigData {

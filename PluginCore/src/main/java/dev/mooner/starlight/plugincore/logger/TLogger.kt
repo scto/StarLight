@@ -6,7 +6,7 @@
 
 package dev.mooner.starlight.plugincore.logger
 
-import dev.mooner.starlight.plugincore.config.Flags
+import dev.mooner.starlight.plugincore.utils.Flags
 
 typealias LazyEval = () -> Any?
 
