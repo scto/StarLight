@@ -13,7 +13,7 @@ import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
 import dev.mooner.configdsl.*
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.JsonNull
 
 data class ButtonConfigOption(
     override val id              : String,
@@ -30,6 +30,8 @@ data class ButtonConfigOption(
 
     override val default: Boolean = false
 
+    private var isEnabled = true
+
     override fun onCreateViewHolder(parent: ViewGroup): ButtonViewHolder {
         val view = LayoutInflater
             .from(parent.context)
@@ -38,13 +40,21 @@ data class ButtonConfigOption(
     }
 
     override fun dataToJson(value: Boolean): JsonElement =
-        JsonPrimitive(null)
+        JsonNull
 
     override fun dataFromJson(jsonElement: JsonElement): Boolean =
         false
 
     override fun onDraw(holder: ButtonViewHolder, data: Boolean) {
-        holder.layout.setOnClickListener(onClickListener)
+        if (onClickListener != null)
+            holder.layout.setOnClickListener { view ->
+                if (isEnabled)
+                    onClickListener.invoke(view)
+            }
+    }
+
+    override fun setEnabled(enabled: Boolean) {
+        isEnabled = enabled
     }
 
     class ButtonViewHolder(itemView: View): DefaultViewHolder(itemView) {
