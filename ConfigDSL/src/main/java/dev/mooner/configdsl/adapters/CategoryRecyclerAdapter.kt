@@ -113,6 +113,7 @@ class CategoryRecyclerAdapter(
             eventPublisher
                 .buffer()
                 .filterIsInstance<ConfigOption.DependencyUpdateData>()
+                .filter { it.provider == actualDepID }
                 .onEach { event ->
                     holder.setEnabled(event.data xor isInverted)
                     option.setEnabled(event.data xor isInverted)
