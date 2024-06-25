@@ -56,7 +56,7 @@ class ProjectListItem(
 ): AbstractBindingItem<CardProjectsBinding>() {
 
     override var identifier: Long
-        get() = project?.info?.id?.hashCode()?.toLong() ?: -1L
+        get() = project!!.info.id.getLongHash()
         set(_) {}
     var project: Project? = null
 

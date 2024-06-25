@@ -20,6 +20,7 @@ import dev.mooner.starlight.R
 import dev.mooner.starlight.plugincore.Session
 import dev.mooner.starlight.plugincore.config.GlobalConfig
 import java.net.URI
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 private val alphanumericPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
@@ -104,3 +105,6 @@ fun Context.openWebUrl(url: String) {
     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
     startActivity(browserIntent)
 }
+
+fun UUID.getLongHash(): Long =
+    mostSignificantBits xor leastSignificantBits
