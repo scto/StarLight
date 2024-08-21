@@ -19,7 +19,9 @@ import dev.mooner.configdsl.Icon
 import dev.mooner.configdsl.adapters.ConfigAdapter
 import dev.mooner.configdsl.config
 import dev.mooner.configdsl.options.button
+import dev.mooner.configdsl.options.toggle
 import dev.mooner.starlight.databinding.FragmentLocationTermsBinding
+import dev.mooner.starlight.plugincore.config.GlobalConfig
 import dev.mooner.starlight.ui.splash.quickstart.QuickStartActivity
 
 class LocationTermsFragment : Fragment() {
@@ -41,20 +43,63 @@ class LocationTermsFragment : Fragment() {
         _binding = FragmentLocationTermsBinding.inflate(inflater, container, false)
         val activity = activity as QuickStartActivity
 
+        activity.setPrevButtonEnabled(true)
+        activity.setNextButtonEnabled(true)
+
         adapter = ConfigAdapter.Builder(activity) {
             bind(binding.recyclerView)
             structure(::getStruct)
             lifecycleOwner(this@LocationTermsFragment)
+            onValueUpdated { _, id, value, _ ->
+                val (pk, key) = when(id) {
+                    "noob" ->
+                        "general" to "newbie_mode"
+                    "use_ext_module" ->
+                        "project" to "load_global_libraries"
+                    "use_plugin" ->
+                        "plugin"  to "safe_mode"
+                    else -> return@onValueUpdated
+                }
+                GlobalConfig.edit {
+                    category(pk).setBoolean(key, (id == "use_plugin") xor (value as Boolean))
+                }
+            }
         }.build()
-
-        activity.hideButton(QuickStartActivity.Buttons.Next)
-        activity.showButton(QuickStartActivity.Buttons.Finish)
 
         return binding.root
     }
 
     private fun getStruct(): ConfigStructure =
         config {
+            category {
+                id = "additional"
+                title = "부가 설정"
+                items {
+                    toggle {
+                        id = "noob"
+                        title = "쉬운 사용 모드"
+                        description = "초심자를 위한 쉬운 사용 모드를 사용합니다."
+                        icon = Icon.ECO
+                        defaultValue = false
+                    }
+                    toggle {
+                        id = "use_ext_module"
+                        title = "외부 모듈 사용"
+                        description = "'modules' 폴더 내의 모듈 코드를 실행합니다."
+                        icon = Icon.DEVELOPER_MODE
+                        defaultValue = true
+                        dependency = "!noob"
+                    }
+                    toggle {
+                        id = "use_plugin"
+                        title = "플러그인 사용"
+                        description = "플러그인 기능을 활성화 합니다."
+                        icon = Icon.DEVELOPER_BOARD
+                        defaultValue = true
+                        dependency = "!noob"
+                    }
+                }
+            }
             category {
                 id = "location_terms"
                 items {
@@ -69,9 +114,7 @@ class LocationTermsFragment : Fragment() {
                     button {
                         id = "location_term"
                         title = "위치 정보 사용에 관하여"
-                        description = """
-                            |위 권한을 허용함으로서 접근할 수 있는 사용자의 위치 정보는 본 앱에서 직접적으로 수집하지 않으며, 오직 사용자의 스크립트 실행을 위해서만 사용됩니다.
-                        """.trimMargin()
+                        description = "위 권한을 허용함으로서 접근할 수 있는 사용자의 위치 정보는 본 앱에서 직접적으로 수집하지 않으며, 오직 사용자의 스크립트 실행을 위해서만 사용됩니다."
                         icon = Icon.BOOKMARK
                         iconTintColor = color("#ffd866")
                     }

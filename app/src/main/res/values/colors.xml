@@ -20,6 +20,7 @@
     <color name="background_chip_accent">#E8D9C4</color>
     <color name="background_popup">#fdfdfd</color>
     <color name="background_log_card">#f7f7f9</color>
+    <color name="background_quickstart">#1B191B</color>
 
     <color name="config_list_item_background">#F0F0F0</color>
 

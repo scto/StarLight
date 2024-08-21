@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">StarLight</string>
-    <string name="app_version" translatable="false">v0.3.0 Alpha ✦</string>
+    <string name="app_version" translatable="false">v0.3.1 Alpha ✦</string>
     <string name="nav_header_title" translatable="false">Project StarLight 🌟</string>
     <string name="nav_header_subtitle" translatable="false">@string/app_version</string>
     <string name="nav_header_desc">Project StarLight Logo</string>
@@ -117,7 +117,4 @@
     <string name="widget_config_button_text">Widget settings</string>
 
     <string name="api_cannot_send_to_room">Cannot send message to a room \'%s\' without receiving initial message.</string>
-
-    <string name="splash_welcome">Welcome</string>
-    <string name="splash_welcome_desc">Let\'s start with the initial settings!</string>
 </resources>

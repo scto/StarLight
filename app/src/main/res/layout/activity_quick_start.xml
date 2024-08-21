@@ -11,166 +11,142 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background_quickstart"
+    android:paddingHorizontal="8dp"
     tools:context=".ui.splash.quickstart.QuickStartActivity">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/card_stepper"
-        style="@style/Stepper.CardView"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="24dp"
-        app:cardBackgroundColor="@color/cardview"
-        app:cardCornerRadius="@dimen/button_corner_radius"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        android:layout_marginStart="@dimen/card_margin_horizontal"
+        android:layout_marginTop="64dp"
+        android:gravity="start"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <com.aceinteract.android.stepper.StepperNavigationView
-            android:id="@+id/stepper"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:clipToPadding="false"
-            android:paddingTop="40dp"
-            android:paddingBottom="40dp"
-            app:stepperIconSize="20dp"
-            app:stepperItems="@menu/menu_stepper"
-            app:stepperTextColor="@color/text"
-            app:stepperTextSize="0sp"
-            app:stepperType="tab"
-            app:stepperWidgetColor="@color/main_bright"
-            tools:ignore="SpeakableTextPresentCheck" />
+        <ImageView
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_logo_foreground"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:fontFamily="@font/nanumsquare_neo_regular"
+            android:text="✦ StarLight 사용을 환영해요!"
+            android:textColor="@color/white"
+            android:textSize="21sp"/>
 
-    </androidx.cardview.widget.CardView>
+        <TextView
+            android:id="@+id/textViewSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:fontFamily="@font/nanumsquare_neo_regular"
+            android:text="아래 권한을 허용해주세요."
+            android:textColor="#CDCDCD"
+            android:textSize="16sp"/>
+    </LinearLayout>
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/frame_stepper"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        android:clipToPadding="true"
+        android:layout_marginTop="36dp"
+        android:layout_marginHorizontal="@dimen/card_margin_horizontal"
         app:defaultNavHost="true"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/materialCardView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout3"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
         app:navGraph="@navigation/nav_stepper"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/button_previous"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
-        android:contentDescription="@string/action_previous_step"
-        android:src="@drawable/ic_round_keyboard_arrow_left_24"
-        android:visibility="gone"
-        app:backgroundTint="@color/main_bright"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:tint="#4c4c4c" />
-
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/button_finish"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
-        android:backgroundTint="@color/main_bright"
-        android:text="@string/finish"
-        android:textColor="#4c4c4c"
-        android:visibility="gone"
-        app:icon="@drawable/ic_round_check_24"
-        app:iconTint="#4c4c4c"
-        app:layout_constraintBottom_toBottomOf="@+id/frame_stepper"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/materialCardView"
+        android:layout_width="40dp"
+        android:layout_height="24dp"
+        android:layout_marginBottom="12dp"
+        app:cardBackgroundColor="#313131"
+        app:cardCornerRadius="6dp"
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/button_next"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
-        android:contentDescription="@string/action_next_step"
-        android:src="@drawable/ic_round_keyboard_arrow_right_24"
-        android:visibility="gone"
-        app:backgroundTint="@color/main_bright"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:tint="#4c4c4c" />
-
-    <View
-        android:id="@+id/guideline_stepper_middle"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        app:layout_constraintBottom_toBottomOf="@id/card_stepper"
-        app:layout_constraintTop_toTopOf="@id/card_stepper" />
-
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="58dp"
-        android:layout_height="58dp"
-        android:layout_marginTop="56dp"
-        android:layout_marginStart="40dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_logo_foreground"/>
-
-    <LinearLayout
-        android:id="@+id/linearLayout2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="40dp"
-        android:gravity="start"
-        android:orientation="vertical"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView2">
+        app:layout_constraintStart_toStartOf="parent">
 
         <TextView
+            android:id="@+id/stepIndicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/wantedsans_medium"
-            android:text="Project StarLight"
-            android:textSize="24sp"/>
+            android:layout_gravity="center"
+            android:fontFamily="@font/nanumsquare_neo_bold"
+            android:text="1 | 3"
+            android:textColor="#B1B1B1"
+            android:textSize="12sp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/wantedsans_regular"
-            android:text="@string/app_version"/>
-    </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <LinearLayout
         android:id="@+id/linearLayout3"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="24dp"
-        android:gravity="start"
-        android:orientation="vertical"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
+        android:layout_marginHorizontal="@dimen/card_margin_horizontal"
+        android:layout_marginBottom="42dp"
+        android:orientation="horizontal"
+        android:animateLayoutChanges="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-        <TextView
-            android:id="@+id/textView9"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/buttonPrev"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/wantedsans_bold"
-            android:text="@string/splash_welcome"
-            android:textSize="28sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout2"/>
+            android:layout_height="50dp"
+            app:cardBackgroundColor="@color/background_quickstart"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#929292"
+            app:strokeWidth="2dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/wantedsans_regular"
-            android:text="@string/splash_welcome_desc"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView9"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginHorizontal="18dp"
+                android:fontFamily="@font/nanumsquare_neo_bold"
+                android:text="&lt; 이전"
+                android:textColor="#D0D0D0"
+                android:textSize="16sp"/>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/buttonNext"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            app:cardBackgroundColor="@color/button_selector"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="0dp">
+
+            <TextView
+                android:id="@+id/textButtonNext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginHorizontal="18dp"
+                android:fontFamily="@font/nanumsquare_neo_bold"
+                android:text="✦ 다음"
+                android:textColor="@color/white"
+                android:textSize="16sp"/>
+
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 

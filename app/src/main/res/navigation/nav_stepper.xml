@@ -9,13 +9,25 @@
         android:id="@+id/step_1_dest"
         android:name="dev.mooner.starlight.ui.splash.quickstart.steps.SetPermissionFragment"
         android:label="@string/step_permission"
-        tools:layout="@layout/fragment_set_permission" />
+        tools:layout="@layout/fragment_set_permission" >
+        <action
+            android:id="@+id/action_step_1_dest_to_step_2_dest"
+            app:destination="@id/step_2_dest"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/wait_anim"
+            app:popEnterAnim="@anim/wait_anim"
+            app:popExitAnim="@anim/slide_out_right"/>
+    </fragment>
 
     <fragment
         android:id="@+id/step_2_dest"
         android:name="dev.mooner.starlight.ui.splash.quickstart.steps.AllowNotificationFragment"
         android:label="@string/step_read_notification"
-        tools:layout="@layout/fragment_allow_notification" />
+        tools:layout="@layout/fragment_allow_notification" >
+        <action
+            android:id="@+id/action_step_2_dest_to_step_3_dest"
+            app:destination="@id/step_3_dest"/>
+    </fragment>
 
     <fragment
         android:id="@+id/step_3_dest"

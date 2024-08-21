@@ -113,7 +113,4 @@
     <string name="widget_config_button_text">위젯 설정</string>
 
     <string name="api_cannot_send_to_room">메세지가 수신되지 않은 방 \'%s\' 에 메세지를 보낼 수 없습니다.</string>
-
-    <string name="splash_welcome">환영합니다</string>
-    <string name="splash_welcome_desc">초기 설정부터 시작해보죠!</string>
 </resources>

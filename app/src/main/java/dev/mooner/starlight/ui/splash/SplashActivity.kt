@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import coil.Coil
@@ -20,7 +19,7 @@ import dev.mooner.starlight.plugincore.Session
 import dev.mooner.starlight.plugincore.event.EventHandler
 import dev.mooner.starlight.plugincore.event.on
 import dev.mooner.starlight.plugincore.logger.LoggerFactory
-import dev.mooner.starlight.ui.splash.quickstart.QuickStartActivity
+import dev.mooner.starlight.ui.splash.quickstart.WelcomeActivity
 import dev.mooner.starlight.ui.splash.quickstart.steps.SetPermissionFragment
 import dev.mooner.starlight.utils.checkPermissions
 import dev.mooner.starlight.utils.restartApplication
@@ -44,11 +43,6 @@ class SplashActivity : AppCompatActivity() {
 
         val pref = getSharedPreferences("general", 0)
         val isInitial = pref.getBoolean(PREF_IS_INITIAL, true)
-        if (isInitial)
-            pref.edit {
-                putBoolean(PREF_IS_INITIAL, false)
-            }
-
         val isPermissionsGrant = checkPermissions(SetPermissionFragment.REQUIRED_PERMISSIONS)
 
         val imageLoader = ImageLoader.Builder(applicationContext)
@@ -74,7 +68,8 @@ class SplashActivity : AppCompatActivity() {
 
         if (TEST_QUICK_START || isInitial || !isPermissionsGrant) {
             //ConfigDSL.registerAdapterImpl(::ParentConfigAdapterImpl)
-            startActivity(Intent(this, QuickStartActivity::class.java))
+            startActivity(Intent(this, WelcomeActivity::class.java))
+            finish()
         } else {
             if (GlobalApplication.lastStageValue != null)
                 binding.textViewLoadStatus.text = "✦ ${GlobalApplication.lastStageValue}"

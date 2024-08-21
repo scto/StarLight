@@ -17,17 +17,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import com.google.android.material.snackbar.Snackbar
 import dev.mooner.configdsl.ConfigItemBuilder
 import dev.mooner.configdsl.ConfigStructure
 import dev.mooner.configdsl.Icon
 import dev.mooner.configdsl.adapters.ConfigAdapter
 import dev.mooner.configdsl.config
 import dev.mooner.configdsl.options.button
-import dev.mooner.starlight.R
+import dev.mooner.peekalert.PeekAlert
 import dev.mooner.starlight.databinding.FragmentSetPermissionBinding
 import dev.mooner.starlight.ui.splash.quickstart.QuickStartActivity
-import dev.mooner.starlight.utils.requestManageStoragePermission
+import dev.mooner.starlight.utils.createFailurePeek
 import java.util.*
 
 class SetPermissionFragment : Fragment() {
@@ -38,22 +37,21 @@ class SetPermissionFragment : Fragment() {
 
     private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
         for ((permission, isGranted) in permissions) {
-            if (!isGranted) {
-                if (permission == MANAGE_EXTERNAL_STORAGE) {
-                    if (!isPermissionGranted(permission))
-                        requireContext().requestManageStoragePermission()
-                    else
-                        continue
-                } else {
-                    Snackbar.make(binding.root, "모든 권한이 승인되지 않았어요.. (´•ω•̥`)و\n$permission", Snackbar.LENGTH_LONG).show()
-                    adapter?.redraw()
-                    return@registerForActivityResult
-                }
+            if (permission == MANAGE_EXTERNAL_STORAGE) {
+                if (isPermissionGranted(permission))
+                    continue
+                createFailurePeek("모든 권한이 승인되지 않았어요. $permission", PeekAlert.Position.Bottom).peek()
+                adapter?.redraw()
+                return@registerForActivityResult
+            } else if (!isGranted) {
+                createFailurePeek("모든 권한이 승인되지 않았어요. $permission", PeekAlert.Position.Bottom).peek()
+                adapter?.redraw()
+                return@registerForActivityResult
             }
         }
-        Snackbar.make(binding.root, "앱을 사용할 준비가 되었어요! ٩(*•̀ᴗ•́*)و", Snackbar.LENGTH_LONG).show()
-        (activity as QuickStartActivity).showButton(QuickStartActivity.Buttons.Next)
         adapter?.redraw()
+
+        (requireActivity() as QuickStartActivity).setNextButtonEnabled(true)
     }
 
     override fun onCreateView(
@@ -63,6 +61,9 @@ class SetPermissionFragment : Fragment() {
         _binding = FragmentSetPermissionBinding.inflate(inflater, container, false)
         val activity = (activity as QuickStartActivity)
 
+        activity.setPrevButtonEnabled(false)
+        activity.setNextButtonEnabled(false)
+
         adapter = ConfigAdapter.Builder(activity){
             bind(binding.recyclerView)
             structure {
@@ -71,32 +72,23 @@ class SetPermissionFragment : Fragment() {
             lifecycleOwner(this@SetPermissionFragment)
         }.build()
 
-        activity.hideButton(QuickStartActivity.Buttons.Next)
-
         return binding.root
     }
 
     private fun getStructure(activity: QuickStartActivity): ConfigStructure {
         return config {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                category {
-                    id = "permission_sdk30"
-                    title = "SDK 30(안드로이드 11) 이상 저장소 권한"
-                    textColor = activity.getColor(R.color.main_bright)
-                    items {
-                        getButtonByPermission(MANAGE_EXTERNAL_STORAGE)
-                    }
-                }
-            }
             category {
                 id = "permissions"
-                title = "아래 권한들을 허용해주세요!"
-                textColor = activity.getColor(R.color.main_bright)
+                title = "아래 필수 권한들을 허용해주세요!"
+                //textColor = activity.getColor(R.color.main_bright)
                 items {
                     for (permission in REQUIRED_PERMISSIONS) {
-                        if (permission == MANAGE_EXTERNAL_STORAGE) continue
+                        if (permission == MANAGE_EXTERNAL_STORAGE)
+                            continue
                         getButtonByPermission(permission)
                     }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                        getButtonByPermission(MANAGE_EXTERNAL_STORAGE)
                 }
             }
             category {
@@ -162,8 +154,10 @@ class SetPermissionFragment : Fragment() {
     }
 
     private fun isPermissionGranted(permission: String) = when(permission) {
-        MANAGE_EXTERNAL_STORAGE -> Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager()
-        else -> requireContext().checkSelfPermission(permission) == PERMISSION_GRANTED
+        MANAGE_EXTERNAL_STORAGE ->
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager()
+        else ->
+            requireContext().checkSelfPermission(permission) == PERMISSION_GRANTED
     }
 
     companion object {

@@ -6,6 +6,7 @@
 
 package dev.mooner.starlight.ui.splash.quickstart.steps
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -24,7 +25,6 @@ import dev.mooner.configdsl.Icon
 import dev.mooner.configdsl.adapters.ConfigAdapter
 import dev.mooner.configdsl.config
 import dev.mooner.configdsl.options.button
-import dev.mooner.starlight.R
 import dev.mooner.starlight.databinding.FragmentAllowNotificationBinding
 import dev.mooner.starlight.ui.splash.quickstart.QuickStartActivity
 
@@ -42,6 +42,9 @@ class AllowNotificationFragment : Fragment() {
         _binding = FragmentAllowNotificationBinding.inflate(inflater, container, false)
         val activity = (activity as QuickStartActivity)
 
+        activity.setPrevButtonEnabled(true)
+        activity.setNextButtonEnabled(false)
+
         adapter = ConfigAdapter.Builder(activity) {
             bind(binding.recyclerView)
             structure {
@@ -50,20 +53,25 @@ class AllowNotificationFragment : Fragment() {
             lifecycleOwner(this@AllowNotificationFragment)
         }.build()
 
-        activity.hideButton(QuickStartActivity.Buttons.Next)
-
         return binding.root
     }
 
     private fun getStructure(activity: QuickStartActivity): ConfigStructure = config {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            category {
-                id = "allow_battery"
-                items {
+        category {
+            id = "permissions"
+            title = "추가 권한"
+            //textColor = activity.getColor(R.color.main_bright)
+            items {
+                button {
+                    id = "info"
+                    title = "아래 권한들을 각각 눌러 권한을 허용해주세요."
+                    icon = Icon.INFO
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     button {
                         id = "ignore_battery_optimization"
                         title = "배터리 최적화 무시"
-                        description = "앱이 꺼지거나 절전모드가 되지 않고 계속해서 실행될 수 있어요."
+                        description = "앱이 꺼지거나 절전모드가 되지 않고 계속해서 실행될 수 있어요. (권장)"
                         icon = Icon.BATTERY_SAVER
                         iconTintColor = color("#7ACA8A")
                         setOnClickListener { _ ->
@@ -71,17 +79,10 @@ class AllowNotificationFragment : Fragment() {
                         }
                     }
                 }
-            }
-        }
-        category {
-            id = "permissions"
-            title = "추가 권한"
-            textColor = activity.getColor(R.color.main_bright)
-            items {
                 button {
                     id = "allow_notification_read"
                     title = "알림 읽기 권한 허용"
-                    description = "앱이 메신저의 알림을 읽을 수 있어요. *"
+                    description = "앱이 메신저의 알림을 읽을 수 있어요. (필수)"
                     icon = Icon.NOTIFICATIONS_ACTIVE
                     iconTintColor = color("#ffd866")
                     setOnClickListener { view ->
@@ -92,6 +93,11 @@ class AllowNotificationFragment : Fragment() {
                         }
                     }
                 }
+            }
+        }
+        category {
+            id = "check"
+            items {
                 button {
                     id = "check_allowed"
                     title = "권한 허용 확인"
@@ -100,10 +106,9 @@ class AllowNotificationFragment : Fragment() {
                     iconTintColor = color("#7ACA8A")
                     setOnClickListener { view ->
                         if (isNotificationGranted(activity)) {
-                            activity.showButton(QuickStartActivity.Buttons.Next)
+                            activity.setNextButtonEnabled(true)
                         } else {
                             Snackbar.make(view, "아직 권한이 허용되지 않았어요.", Snackbar.LENGTH_SHORT).show()
-                            activity.hideButton(QuickStartActivity.Buttons.Next)
                         }
                     }
                 }
@@ -111,6 +116,7 @@ class AllowNotificationFragment : Fragment() {
         }
     }
 
+    @SuppressLint("BatteryLife")
     private fun requestIgnoreBatteryOptimization(context: Context) {
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         val packageName = context.packageName
