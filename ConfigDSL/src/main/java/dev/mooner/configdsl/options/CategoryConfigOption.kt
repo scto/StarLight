@@ -18,7 +18,7 @@ import dev.mooner.configdsl.adapters.CategoryRecyclerAdapter
 import dev.mooner.configdsl.utils.hasFlag
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -44,7 +44,7 @@ class CategoryConfigOption(
 
     private val childAdapters: MutableList<CategoryRecyclerAdapter> = arrayListOf()
     private val eventScope: CoroutineScope =
-        CoroutineScope(Dispatchers.Default)
+        CoroutineScope(Dispatchers.IO)
 
     override fun onCreateViewHolder(parent: ViewGroup): CategoryViewHolder {
         val view = LayoutInflater
@@ -98,7 +98,7 @@ class CategoryConfigOption(
     }
 
     override fun onDestroyed() {
-        eventScope.cancel()
+        eventScope.coroutineContext.cancelChildren()
 
         childAdapters.forEach(CategoryRecyclerAdapter::destroy)
         childAdapters.clear()

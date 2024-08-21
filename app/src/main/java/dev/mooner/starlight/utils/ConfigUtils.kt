@@ -23,11 +23,11 @@ const val EXTRA_SUBTITLE = "subTitle"
 const val EXTRA_ACTIVITY_ID = "activityId"
 
 data class DataHolder(
-    var isPaused  : Boolean = false,
-    val struct    : ConfigStructure,
-    val saved     : MutableDataMap,
-    val publisher : MutableSharedFlow<ApplicationEvent.ConfigActivity>,
-    val flow      : Flow<ApplicationEvent.ConfigActivity>
+    var isPaused    : Boolean = false,
+    val structBlock : ConfigActivity.() -> ConfigStructure,
+    val saved       : MutableDataMap,
+    val publisher   : MutableSharedFlow<ApplicationEvent.ConfigActivity>,
+    val flow        : Flow<ApplicationEvent.ConfigActivity>
 )
 
 //private var instanceCount: Int = 0
@@ -42,6 +42,16 @@ fun Context.startConfigActivity(
     title          : String,
     subTitle       : String,
     struct         : ConfigStructure,
+    saved          : MutableDataMap = hashMapOf(),
+    onValueUpdated : OnValueUpdatedListener = { _, _, _, _ -> },
+    onDestroy      : () -> Unit = {}
+) = startConfigActivity(uuid, title, subTitle, { struct }, saved, onValueUpdated, onDestroy)
+
+fun Context.startConfigActivity(
+    uuid           : String? = null,
+    title          : String,
+    subTitle       : String,
+    structBlock    : ConfigActivity.() -> ConfigStructure,
     saved          : MutableDataMap = hashMapOf(),
     onValueUpdated : OnValueUpdatedListener = { _, _, _, _ -> },
     onDestroy      : () -> Unit = {}
@@ -69,7 +79,7 @@ fun Context.startConfigActivity(
             }
         }
 
-    holders[activityId] = DataHolder(false, struct, saved, publisher, flow)
+    holders[activityId] = DataHolder(false, structBlock, saved, publisher, flow)
     val intent = Intent(this, ConfigActivity::class.java).apply {
         putExtra(EXTRA_TITLE, title)
         putExtra(EXTRA_SUBTITLE, subTitle)

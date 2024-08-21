@@ -74,8 +74,9 @@ class ConfigActivity : AppCompatActivity() {
             return
         }
 
+        val struct = holder.structBlock.invoke(this)
         recyclerAdapter = ParentConfigAdapter(
-            configStructure  = holder.struct,
+            configStructure  = struct,
             configData       = holder.saved,
             coroutineContext = lifecycleScope.coroutineContext
         ).also(ParentConfigAdapter::notifyAllItemInserted).apply {

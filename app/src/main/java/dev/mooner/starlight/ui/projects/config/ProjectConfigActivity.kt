@@ -72,6 +72,7 @@ class ProjectConfigActivity: AppCompatActivity() {
             .toSet()
 
         configAdapter = ConfigAdapter.Builder(this) {
+            lifecycleOwner(this@ProjectConfigActivity)
             bind(binding.configRecyclerView)
             onValueUpdated { parentId, id, data, jsonData ->
                 changedData
@@ -90,7 +91,6 @@ class ProjectConfigActivity: AppCompatActivity() {
             }
             @Suppress("UNCHECKED_CAST")
             configData((project.config.getData() as MutableDataMap).injectEventIds(project.info.allowedEventIds))
-            lifecycleOwner(this@ProjectConfigActivity)
         }.build()
 
         fabProjectConfig.setOnClickListener { view ->
@@ -134,6 +134,12 @@ class ProjectConfigActivity: AppCompatActivity() {
         val textViewConfigProjectName: TextView = findViewById(R.id.textViewConfigProjectName)
         textViewConfigProjectName.text = projectName
         fabProjectConfig.hide()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        configAdapter?.destroy()
+        configAdapter = null
     }
 
     private fun MutableDataMap.injectEventIds(ids: Set<String>): MutableDataMap {
