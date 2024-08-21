@@ -6,43 +6,26 @@
 
 package dev.mooner.starlight.ui.settings
 
-import android.app.Activity
-import android.app.DownloadManager
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
-import android.os.Environment
 import android.provider.Settings
-import android.widget.Toast
-import androidx.core.content.FileProvider
-import androidx.core.database.getLongOrNull
-import androidx.lifecycle.lifecycleScope
 import dev.mooner.configdsl.Icon
 import dev.mooner.configdsl.config
 import dev.mooner.configdsl.options.button
 import dev.mooner.configdsl.options.toggle
-import dev.mooner.peekalert.PeekAlert
 import dev.mooner.starlight.R
 import dev.mooner.starlight.plugincore.config.GlobalConfig
-import dev.mooner.starlight.plugincore.logger.LoggerFactory
-import dev.mooner.starlight.plugincore.translation.Locale
-import dev.mooner.starlight.plugincore.translation.translate
 import dev.mooner.starlight.ui.config.options.page
 import dev.mooner.starlight.ui.config.options.singleCategoryPage
 import dev.mooner.starlight.ui.settings.dev.startDevModeActivity
 import dev.mooner.starlight.ui.settings.info.AppInfoActivity
 import dev.mooner.starlight.ui.settings.notifications.NotificationRulesActivity
 import dev.mooner.starlight.ui.settings.solver.getProblemSolverStruct
-import dev.mooner.starlight.utils.*
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import java.io.File
-
-private val logger = LoggerFactory.logger {  }
+import dev.mooner.starlight.ui.settings.update.startCheckUpdateActivity
+import dev.mooner.starlight.utils.restartApplication
+import dev.mooner.starlight.utils.showConfirmDialog
+import dev.mooner.starlight.utils.startActivity
+import dev.mooner.starlight.utils.startConfigActivity
 
 context(SettingsFragment)
 internal fun getSettingsStruct() = config {
@@ -96,7 +79,7 @@ internal fun getSettingsStruct() = config {
             toggle {
                 id = "compile_animation"
                 title = "컴파일 애니메이션"
-                description = "컴파일 시 프로그레스 바의 애니메이션을 부드럽게 조정합니다."
+                description = "컴파일 시 진행도 애니메이션을 부드럽게 조정합니다."
                 icon = Icon.COMPRESS
                 iconTintColor = color { "#FEAC5E" }
                 defaultValue = true
@@ -104,7 +87,7 @@ internal fun getSettingsStruct() = config {
             toggle {
                 id = "load_global_libraries"
                 title = "전역 모듈 로드"
-                description = "StarLight/modules 폴더 내의 모듈을 컴파일 시 적용합니다. 신뢰할 수 없는 코드가 실행될 수 있습니다."
+                description = "StarLight/modules 폴더를 모듈 로드 경로에 포함합니다."
                 icon = Icon.FOLDER
                 iconTintColor = color { "#4BC0C8" }
                 defaultValue = false
@@ -198,7 +181,7 @@ internal fun getSettingsStruct() = config {
                     toggle {
                         id = "use_on_notification_posted"
                         title = "onNotificationPosted 이벤트 사용"
-                        description = "메신저봇의 onNotificationPosted 이벤트를 사용합니다. 부하가 증가할 수 있습니다."
+                        //description = "메신저봇의 onNotificationPosted 이벤트를 사용합니다."
                         icon = Icon.COMPRESS
                         iconTintColor = color { "#87AAAA" }
                         defaultValue = false
@@ -232,7 +215,8 @@ internal fun getSettingsStruct() = config {
                 icon = Icon.CLOUD_DOWNLOAD
                 iconTintColor = color { "#A7D0CD" }
                 setOnClickListener { _ ->
-                    checkUpdate()
+                    //checkUpdate()
+                    requireActivity().startCheckUpdateActivity()
                 }
             }
             button {
@@ -369,7 +353,8 @@ internal fun getNoobSettingStruct() = config {
                 icon = Icon.CLOUD_DOWNLOAD
                 iconTintColor = color { "#A7D0CD" }
                 setOnClickListener { _ ->
-                    checkUpdate()
+                    //checkUpdate()
+                    requireContext().startCheckUpdateActivity()
                 }
             }
             button {
@@ -392,186 +377,4 @@ internal fun getNoobSettingStruct() = config {
             }
         }
     }
-}
-
-context(SettingsFragment)
-private fun checkUpdate() {
-    createSimplePeek(
-        text = translate {
-            Locale.ENGLISH { "Plz wait for a sec..." }
-            Locale.KOREAN  { "서버를 열심히 뒤져보는 중..." }
-        }
-    ) {
-        position = PeekAlert.Position.Bottom
-        iconRes = R.drawable.ic_round_cloud_24
-        iconTint(res = R.color.main_bright)
-        backgroundColor(res = R.color.background_popup)
-    }.peek()
-
-    lifecycleScope.launch {
-        val channel = GlobalConfig
-            .category("dev_mode_config")
-            .getInt("update_channel", VersionChecker.Channel.STABLE.ordinal)
-            .let(VersionChecker.Channel.entries::get)
-        logger.debug { "update check channel= $channel" }
-
-        val version = withContext(Dispatchers.IO) {
-            VersionChecker().fetchVersion(channel)
-        }
-        if (version == null) {
-            createSimplePeek(
-                text = translate {
-                    Locale.ENGLISH { "Failed to parse or fetch version info from server. Please try again later." }
-                    Locale.KOREAN  { "서버로부터 버전 정보를 불러오는 데 실패했어요. 나중에 다시 시도해주세요." }
-                }
-            ) {
-                position = PeekAlert.Position.Bottom
-                iconRes = R.drawable.ic_round_close_24
-                iconTint(res = R.color.code_error)
-                backgroundColor(res = R.color.background_popup)
-            }.peek()
-            return@launch
-        }
-        val versionCode = requireContext().getAppVersionCode()
-        if (version.versionCode <= versionCode) {
-            createSimplePeek(
-                text = translate {
-                    Locale.ENGLISH { "App is already on the newest version." }
-                    Locale.KOREAN  { "앱이 이미 최신 버전이에요." }
-                }
-            ) {
-                position = PeekAlert.Position.Bottom
-                iconRes = R.drawable.ic_round_check_24
-                iconTint(res = R.color.noctis_green)
-                backgroundColor(res = R.color.background_popup)
-            }.peek()
-            return@launch
-        }
-
-        val pInfo = requireContext().getPackageInfo()
-        showConfirmDialog(
-            context = requireActivity(),
-            title = translate {
-                Locale.ENGLISH { "New version found" }
-                Locale.KOREAN  { "새로운 버전 확인 (*˙˘˙*)!" }
-            },
-            message = translate {
-                Locale.ENGLISH {
-                    """
-                    |A version newer than installed was found:
-                    |${pInfo.versionName} >> ${version.version}
-                    |Would you download the newer version of this app?
-                    """.trimMargin()
-                }
-                Locale.KOREAN  {
-                    """
-                    |현재 설치된 버전보다 새로운 버전이 있어요:
-                    |${pInfo.versionName} >> ${version.version}
-                    |새 버전을 다운로드 할까요?
-                    """.trimMargin()
-                }
-            }
-        ) { confirm ->
-            if (!confirm)
-                return@showConfirmDialog
-            val dest = requireContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
-                .resolve("sl_update")
-                .also(File::mkdirs)
-                .resolve("sl_${version.version}_${version.versionCode}.apk")
-            if (dest.exists())
-                dest.delete()
-
-            val alert = createSimplePeek(
-                text = "다운로드중..."
-            ) {
-                position = PeekAlert.Position.Bottom
-                iconRes = R.drawable.ic_round_download_24
-                iconTint(res = R.color.main_bright)
-                backgroundColor(res = R.color.background_popup)
-                autoHideMillis = null
-            }.also(PeekAlert::peek)
-
-            downloadFileFromURL(requireActivity(), version.downloadUrl, dest)
-                .onEach { (status, progress) ->
-                    println("$status : ${progress}%")
-                    if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                        alert.apply {
-                            setIcon(R.drawable.ic_round_check_24)
-                            setIconTint(R.color.noctis_green)
-                            setText("파일을 성공적으로 다운로드 했어요! (뿌듯)")
-                            setAutoHide(3000L)
-                        }.peek()
-                        val destUri = FileProvider.getUriForFile(requireContext(), "dev.mooner.starlight.provider", dest)
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            if (!requireContext().packageManager.canRequestPackageInstalls()) {
-                                Toast.makeText(requireContext(), "먼저 앱 설치 권한을 허용해 주세요.", Toast.LENGTH_LONG).show()
-                                requestAppInstallPermission()
-                            }
-                        }
-                        requestInstall(requireContext(), destUri)
-                    }
-                }
-                .launchIn(lifecycleScope)
-        }
-    }
-}
-
-private fun downloadFileFromURL(context: Activity, url: String, dest: File): StateFlow<Pair<Int, Int>> {
-    val scope = CoroutineScope(Dispatchers.Default)
-    val flow = MutableStateFlow(0 to -1)
-
-    val downloadManager = context.getSystemService(Activity.DOWNLOAD_SERVICE) as DownloadManager
-    val request = DownloadManager.Request(Uri.parse(url))
-        .setDestinationUri(Uri.fromFile(dest))
-        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
-        .setTitle("새 버전 다운로드")
-        .setDescription("열심히 내려받는 중...")
-
-    val downloadId = downloadManager.enqueue(request)
-    scope.launch {
-        var broken = false
-        while (!broken) {
-            downloadManager.query(DownloadManager.Query().setFilterById(downloadId)).use { cursor ->
-                if (cursor.moveToFirst()) {
-                    val columnIdx = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
-                    if (columnIdx < 0)
-                        return@use
-                    when(val status = cursor.getInt(columnIdx)) {
-                        DownloadManager.STATUS_SUCCESSFUL,
-                        DownloadManager.STATUS_FAILED -> {
-                            flow.emit(status to -1)
-                            broken = true
-                            return@use
-                        }
-                        DownloadManager.STATUS_RUNNING -> {
-                            val totalBytes = cursor.getLongOrNull(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
-                                ?: return@use
-                            println("totalBytes: ${totalBytes / 1000}kb")
-                            if (totalBytes < 0)
-                                return@use
-                            val downloaded = cursor.getLongOrNull(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
-                                ?: return@use
-                            println("downloaded: ${downloaded / 1000}kb")
-                            flow.emit(status to (downloaded * 100 / totalBytes).toInt())
-                        }
-                    }
-                }
-            }
-            delay(100L)
-        }
-    }
-
-    return flow
-}
-
-private fun requestInstall(context: Context, uri: Uri) {
-    val intent = Intent(Intent.ACTION_VIEW)
-    intent.setDataAndType(
-        uri, "application/vnd.android.package-archive"
-    )
-    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    context.startActivity(intent)
-    //startActivity(context, intent, null)
 }

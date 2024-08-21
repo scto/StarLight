@@ -11,9 +11,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.JsonNames
 import org.jsoup.Jsoup
+import org.jsoup.parser.Parser
 
 private typealias VersionMap = Map<VersionChecker.Channel, VersionChecker.VersionInfo>
 
@@ -21,6 +21,27 @@ class VersionChecker {
 
     fun fetchVersion(channel: Channel): VersionInfo? =
         fetchVersion().getOrNull()?.get(channel)
+
+    fun fetchChangeLog(version: VersionInfo): String? {
+        val fileName = version.changelog
+        val fullUrl = CHANGELOG_REMOTE_URL + fileName
+
+        return runBlocking(Dispatchers.IO) {
+            runCatching {
+                Jsoup.connect(fullUrl)
+                    .get()
+                    .apply {
+                        outputSettings()
+                            .prettyPrint(false)
+                    }
+                    .body()
+                    .html()
+                    .let {
+                        Parser.unescapeEntities(it, false)
+                    }
+            }.getOrNull()
+        }
+    }
 
     private fun fetchVersion(): Result<VersionMap> {
         return runBlocking(Dispatchers.IO) {
@@ -37,13 +58,15 @@ class VersionChecker {
     }
 
     companion object {
-        private const val VERSION_REMOTE_URL = "https://raw.githubusercontent.com/mooner1022/starlight-version/master/version.json"
+        private const val VERSION_REMOTE_URL   = "https://raw.githubusercontent.com/mooner1022/starlight-version/master/version.json"
+        private const val CHANGELOG_REMOTE_URL = "https://raw.githubusercontent.com/mooner1022/starlight-version/master/changes/"
     }
 
     @Serializable
     data class VersionInfo(
         val version     : String,
         val versionCode : Int,
+        val changelog   : String,
         val downloadUrl : String,
     )
 

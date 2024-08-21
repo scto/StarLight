@@ -9,6 +9,7 @@ package dev.mooner.starlight
 import android.os.Bundle
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
@@ -22,6 +23,7 @@ import dev.mooner.starlight.plugincore.utils.hasFlag
 import dev.mooner.starlight.ui.ViewPagerAdapter
 import dev.mooner.starlight.utils.LAYOUT_TABLET
 import dev.mooner.starlight.utils.layoutMode
+import dev.mooner.starlight.utils.showChangelogDialog
 import kotlin.math.abs
 
 class MainActivity : AppCompatActivity() {
@@ -58,6 +60,15 @@ class MainActivity : AppCompatActivity() {
             }
 
             appBarLayout.addOnOffsetChangedListener(::handleOffsetUpdate)
+        }
+
+        val prefs = getSharedPreferences("general", 0)
+        val lastVersionCode = prefs.getInt("lastVersionCode", 0)
+        if (lastVersionCode < BuildConfig.VERSION_CODE) {
+            showChangelogDialog("StarLight 업데이트 완료!")
+            prefs.edit {
+                putInt("lastVersionCode", BuildConfig.VERSION_CODE)
+            }
         }
     }
 
