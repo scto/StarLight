@@ -127,14 +127,8 @@ class ProjectConfigActivity: AppCompatActivity() {
             val filtered = changedData.filter { it.key in langConfIds }
             if (filtered.isNotEmpty())
                 project.getLanguage().onConfigUpdated(filtered)
-            createSimplePeek(
-                text = "설정 저장 완료!"
-            ) {
-                position = PeekAlert.Position.Bottom
-                iconRes = R.drawable.ic_round_check_24
-                iconTint(res = R.color.noctis_green)
-                backgroundColor(res = R.color.background_popup)
-            }.peek()
+
+            createSuccessPeek("설정 저장 완료!", PeekAlert.Position.Bottom).peek()
             fabProjectConfig.hide()
         }
 
@@ -162,14 +156,14 @@ class ProjectConfigActivity: AppCompatActivity() {
                 config
                     .category("beta_features")
                     .getString("custom_buttons")
-                    ?.let<_, List<Map<String, PrimitiveTypedString>>>(Session.json::decodeFromString)
+                    ?.let<_, List<Map<String, PrimitiveTypedString>>>(json::decodeFromString)
                     ?.map { it["button_id"]!!.castAs<String>() to Icon.entries.toTypedArray()[it["button_icon"]!!.castAs()] }
                     ?: listOf()
             }.getOrElse {
                 config
                     .category("beta_features")
                     .getList("custom_buttons")
-                    ?.map<_, ProjectButtonData>(Session.json::decodeFromJsonElement)
+                    ?.map<_, ProjectButtonData>(json::decodeFromJsonElement)
                     ?.map { it.id to (it.icon?.let(Icon.entries::get) ?: Icon.LAYERS) }
                     ?: listOf()
             }

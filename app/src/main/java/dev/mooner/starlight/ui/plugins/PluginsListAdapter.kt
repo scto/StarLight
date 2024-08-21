@@ -47,7 +47,6 @@ class PluginsListAdapter(
                 setIcon {
                     it.load(iconFile) {
                         scale(Scale.FIT)
-                        transformations(RoundedCornersTransformation(context.resources.getDimension(R.dimen.lang_icon_corner_radius)))
                     }
                 }
             } else

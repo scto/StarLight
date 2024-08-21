@@ -125,13 +125,13 @@ private fun Fragment.createPeek(title: String, text: String): PeekAlert {
         setCommonAttrs()
         title(title) {
             textColor(R.color.white)
-            textSize = 14f
-            typeface = getTypeface(this@createPeek.requireContext(), R.font.wantedsans_medium)
+            textSize = 10f
+            typeface = getTypeface(this@createPeek.requireContext(), R.font.nanumsquare_neo_regular)
         }
         text(text) {
             textColor(R.color.white)
             textSize = 12f
-            typeface = getTypeface(this@createPeek.requireContext(), R.font.wantedsans_regular)
+            typeface = getTypeface(this@createPeek.requireContext(), R.font.nanumsquare_neo_bold)
         }
     }
 }
@@ -141,24 +141,24 @@ private fun Activity.createPeek(title: String, text: String): PeekAlert {
         setCommonAttrs()
         title(title) {
             textColor(R.color.white)
-            textSize = 14f
-            typeface = getTypeface(this@createPeek, R.font.wantedsans_medium)
+            textSize = 10f
+            typeface = getTypeface(this@createPeek, R.font.nanumsquare_neo_regular)
         }
         text(text) {
             textColor(R.color.white)
             textSize = 12f
-            typeface = getTypeface(this@createPeek, R.font.wantedsans_regular)
+            typeface = getTypeface(this@createPeek, R.font.nanumsquare_neo_bold)
         }
     }
 }
 
 private fun PeekAlertBuilder.setCommonAttrs() {
     autoHideMillis = 5000L
-    paddingDp = 15
+    paddingDp = 12
     position = PeekAlert.Position.Top
     width = LayoutParams.WRAP_CONTENT
     cornerRadius = dp(14).toFloat()
-    iconRes = R.drawable.ic_round_projects_24
+    iconRes = R.drawable.ic_round_mark_chat_unread_24
     iconTint(res = R.color.white)
     draggable = true
 }

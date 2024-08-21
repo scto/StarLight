@@ -11,11 +11,13 @@
     android:paddingStart="@dimen/widget_card_margin_horizontal"
     android:paddingEnd="@dimen/widget_card_margin_horizontal">
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_wrapper"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        app:strokeWidth="2dp"
+        tools:strokeColor="@color/main_bright"
         app:cardBackgroundColor="@color/background_selection_card"
         app:cardCornerRadius="10dp"
         app:cardElevation="@dimen/card_elevation">
@@ -63,5 +65,5 @@
             </LinearLayout>
         </LinearLayout>
 
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 </LinearLayout>
