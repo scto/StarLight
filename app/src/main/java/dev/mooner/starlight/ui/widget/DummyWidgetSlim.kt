@@ -39,7 +39,7 @@ class DummyWidgetSlim: Widget() {
                 isSingleLine = false
                 isNestedScrollingEnabled = true
                 layoutTransition = LayoutTransition()
-                params {
+                updateParams {
                     marginStart = dp { 10 }
                     marginEnd = dp { 70 }
                     gravity = Gravity.CENTER_VERTICAL or Gravity.START
@@ -59,7 +59,7 @@ class DummyWidgetSlim: Widget() {
                     chipGroup.addView(chip)
                 }
             ) {
-                params {
+                updateParams {
                     topMargin = dp { 30 }
                     gravity = Gravity.TOP or Gravity.END
                 }
@@ -72,7 +72,7 @@ class DummyWidgetSlim: Widget() {
                     chipGroup.removeAllViewsInLayout()
                 }
             ) {
-                params {
+                updateParams {
                     bottomMargin = dp { 30 }
                     gravity = Gravity.BOTTOM or Gravity.END
                 }

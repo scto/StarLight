@@ -60,7 +60,7 @@ class LogGenWidget: Widget() {
                 width = MATCH_PARENT,
                 height = WRAP_CONTENT
             ) {
-                params {
+                updateParams {
                     setPadding(0, dp(10), 0, dp(30))
                 }
 
@@ -70,7 +70,7 @@ class LogGenWidget: Widget() {
                             onClick(it, type)
                         }
                         text = type.name.substring(0, 1)
-                        params {
+                        updateParams {
                             height = WRAP_CONTENT
                             width = WRAP_CONTENT
                         }
@@ -81,7 +81,7 @@ class LogGenWidget: Widget() {
                 width = WRAP_CONTENT,
                 height = WRAP_CONTENT
             ) {
-                params {
+                updateParams {
                     gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
                 }
                 isChecked = false
