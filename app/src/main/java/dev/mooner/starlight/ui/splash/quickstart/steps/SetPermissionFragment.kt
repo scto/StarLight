@@ -27,6 +27,7 @@ import dev.mooner.peekalert.PeekAlert
 import dev.mooner.starlight.databinding.FragmentSetPermissionBinding
 import dev.mooner.starlight.ui.splash.quickstart.QuickStartActivity
 import dev.mooner.starlight.utils.createFailurePeek
+import dev.mooner.starlight.utils.requestManageStoragePermission
 import java.util.*
 
 class SetPermissionFragment : Fragment() {
@@ -64,10 +65,10 @@ class SetPermissionFragment : Fragment() {
         activity.setPrevButtonEnabled(false)
         activity.setNextButtonEnabled(false)
 
-        adapter = ConfigAdapter.Builder(activity){
+        adapter = ConfigAdapter.Builder(activity) {
             bind(binding.recyclerView)
             structure {
-                getStructure(activity)
+                getStructure()
             }
             lifecycleOwner(this@SetPermissionFragment)
         }.build()
@@ -75,7 +76,7 @@ class SetPermissionFragment : Fragment() {
         return binding.root
     }
 
-    private fun getStructure(activity: QuickStartActivity): ConfigStructure {
+    private fun getStructure(): ConfigStructure {
         return config {
             category {
                 id = "permissions"
@@ -99,6 +100,8 @@ class SetPermissionFragment : Fragment() {
                         title = "권한 허용하기"
                         icon = Icon.CHECK
                         setOnClickListener { _ ->
+                            if (MANAGE_EXTERNAL_STORAGE in REQUIRED_PERMISSIONS && !isPermissionGranted(MANAGE_EXTERNAL_STORAGE))
+                                requireContext().requestManageStoragePermission()
                             requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
                         }
                     }
