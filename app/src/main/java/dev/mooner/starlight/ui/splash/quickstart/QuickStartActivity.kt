@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.AnimBuilder
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -22,6 +23,8 @@ import dev.mooner.starlight.PREF_IS_INITIAL
 import dev.mooner.starlight.R
 import dev.mooner.starlight.databinding.ActivityQuickStartBinding
 import dev.mooner.starlight.utils.restartApplication
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class QuickStartActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -87,13 +90,17 @@ class QuickStartActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun finishQuickStart() {
         val prefs = getSharedPreferences("general", 0)
-        prefs.edit {
+        prefs.edit(commit = true) {
             putBoolean(PREF_IS_INITIAL, false)
             putInt("lastVersionCode", BuildConfig.VERSION_CODE)
         }
 
         Toast.makeText(this, "설정 완료, StarLight 사용을 환영합니다!", Toast.LENGTH_LONG).show()
-        restartApplication()
+
+        lifecycleScope.launch {
+            delay(200)
+            restartApplication()
+        }
     }
 
     @IdRes
