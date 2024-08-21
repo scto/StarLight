@@ -11,7 +11,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.size.Scale
-import coil.transform.RoundedCornersTransformation
 import dev.mooner.starlight.R
 import dev.mooner.starlight.plugincore.plugin.StarlightPlugin
 import dev.mooner.starlight.ui.plugins.config.PluginConfigActivity
@@ -41,6 +40,7 @@ class PluginsListAdapter(
 
         holder.card.apply {
             title = info.name
+            subTitle = "v${info.version}"
 
             val iconFile = File(plugin.getInternalDataDirectory().resolve("assets"), "icon.png")
             if (iconFile.exists() && iconFile.isFile) {

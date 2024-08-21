@@ -44,6 +44,7 @@ class ExpandableCard @JvmOverloads constructor(context: Context, attrs: Attribut
     private var binding: ExpandableCardBinding by Delegates.notNull()
 
     private var _title: String? = null
+    private var _subTitle: String? = null
     private var _switchValue: Boolean = false
     private var _switchEnabled: Boolean = true
     private var innerView: View? = null
@@ -118,6 +119,8 @@ class ExpandableCard @JvmOverloads constructor(context: Context, attrs: Attribut
         with(binding) {
             if (!_title.isNullOrEmpty())
                 cardTitle.text = _title
+            if (!_subTitle.isNullOrEmpty())
+                cardSubtitle.text = _subTitle
 
             cardHeader.visibility = View.VISIBLE
             iconDrawable?.let { drawable ->
@@ -130,7 +133,6 @@ class ExpandableCard @JvmOverloads constructor(context: Context, attrs: Attribut
             }
 
             cardLayout.apply {
-                rippleColor = ContextCompat.getColorStateList(context, android.R.color.transparent)
                 setOnClickListener(onClickListener)
             }
             cardArrow.setOnClickListener(onClickListener)
@@ -198,9 +200,7 @@ class ExpandableCard @JvmOverloads constructor(context: Context, attrs: Attribut
 
                 with(binding) {
                     cardLayout.layoutParams.height = height
-
-                    cardContainer.requestLayout()
-                    cardContainer.layoutParams.height = height
+                    cardLayout.requestLayout()
                 }
             }
 
@@ -328,6 +328,12 @@ class ExpandableCard @JvmOverloads constructor(context: Context, attrs: Attribut
         set(value) {
             binding.cardTitle.text = value
             _title = value
+        }
+
+    var subTitle: String? get() = _subTitle
+        set(value) {
+            binding.cardSubtitle.text = value
+            _subTitle = value
         }
 
     var switchValue: Boolean
