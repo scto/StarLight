@@ -1,5 +1,5 @@
 import java.text.SimpleDateFormat
-import java.util.Random
+import java.util.*
 
 plugins {
     alias(libs.plugins.android.application)
@@ -10,7 +10,7 @@ plugins {
 }
 
 val nightly = true
-val timeMillis = System.currentTimeMillis() + 1 // Invalidate cache
+val timeMillis = System.currentTimeMillis() + 2 // Invalidate cache
 
 android {
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -83,7 +83,6 @@ dependencies {
     implementation(libs.imagepicker)
     debugImplementation(libs.leakcanary.android)
     implementation(libs.jsoup)
-    implementation(libs.android.stepper)
     implementation(libs.flexbox)
     implementation(libs.chip.navigation.bar)
     implementation(libs.process.phoenix)
