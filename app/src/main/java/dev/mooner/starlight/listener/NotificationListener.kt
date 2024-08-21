@@ -59,19 +59,6 @@ class NotificationListener: NotificationListenerService() {
 
     private val eventReceiverScope: CoroutineScope =
         CoroutineScope(Dispatchers.Default + SupervisorJob())
-    private val replier = Replier { roomName, msg, hideToast ->
-        val chatRoom = roomName?.let(::getRoomByName) ?: lastReceivedRoom
-        if (chatRoom == null) {
-            if (!hideToast) {
-                Handler(Looper.getMainLooper()).post {
-                    Toast.makeText(applicationContext, "메세지가 수신되지 않은 방 '$roomName' 에 메세지를 보낼 수 없습니다.", Toast.LENGTH_LONG).show()
-                }
-            }
-            false
-        } else {
-            chatRoom.send(msg)
-        }
-    }
 
     override fun onListenerConnected() {
         super.onListenerConnected()
@@ -168,6 +155,7 @@ class NotificationListener: NotificationListenerService() {
 
                     if (legacyEvent) {
                         val imageDB = ImageDB(data.sender.profileBitmap)
+                        val replier = getOrCreateReplier(roomID)
 
                         Session.projectManager.fireEvent<LegacyEvent>(roomName, message, sender, isGroupChat, replier, imageDB) { project, e ->
                             e.printStackTrace()
@@ -235,6 +223,24 @@ class NotificationListener: NotificationListenerService() {
             .also(EventHandler::fireEventWithScope)
     }
 
+    private fun getOrCreateReplier(roomId: RoomID): Replier {
+        return replierCache[roomId] ?: Replier { room, message, hideToast ->
+            val chatRoom = room?.let(::getRoomByName) ?: chatRooms[roomId]
+            if (chatRoom == null) {
+                if (!hideToast) {
+                    Handler(Looper.getMainLooper()).post {
+                        Toast.makeText(applicationContext, "메세지가 수신되지 않은 방 '$room' 에 메세지를 보낼 수 없습니다.", Toast.LENGTH_LONG).show()
+                    }
+                }
+                false
+            } else {
+                chatRoom.send(message)
+            }
+        }.also {
+            replierCache[roomId] = it
+        }
+    }
+
     private fun StatusBarNotification.toDeletedMessage(): DeletedMessage? {
         val extras = notification.extras ?: return null
 
@@ -267,6 +273,7 @@ class NotificationListener: NotificationListenerService() {
         private var currentChatLogId: Long = -1
         private val roomIdMap: MutableMap<RoomName, RoomID> = hashMapOf()
         private val chatRooms: MutableMap<RoomID, ChatRoom> = WeakHashMap()
+        private val replierCache: MutableMap<RoomID, Replier> = WeakHashMap()
         private var lastReceivedRoom: ChatRoom? = null
         private var rules: List<RuleData> = arrayListOf()
 
