@@ -22,7 +22,7 @@ fun Context.requestManageStoragePermission() {
 }
 
 fun getLanguageByExtension(ext: String): DefaultEditorActivity.Language? =
-    DefaultEditorActivity.Language.values().firstOrNull { ext in it.fileExt }
+    DefaultEditorActivity.Language.entries.firstOrNull { ext in it.fileExt }
 
 fun String.toFile(): File =
     File(this)

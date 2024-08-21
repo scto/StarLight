@@ -48,12 +48,9 @@ import dev.mooner.starlight.plugincore.project.event.ProjectEventManager
 import dev.mooner.starlight.plugincore.project.event.getInstance
 import dev.mooner.starlight.plugincore.translation.Locale
 import dev.mooner.starlight.plugincore.translation.translate
+import dev.mooner.starlight.utils.*
 import dev.mooner.starlight.utils.align.Align
 import dev.mooner.starlight.utils.align.toGridItems
-import dev.mooner.starlight.utils.createSuccessPeek
-import dev.mooner.starlight.utils.dp
-import dev.mooner.starlight.utils.setCommonAttrs
-import dev.mooner.starlight.utils.warn
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.lang.ref.WeakReference
@@ -170,7 +167,7 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
     }
 
     private suspend fun ItemAdapter<ProjectListItem>.updateProjectView(project: Project) {
-        val index = getAdapterPosition(project.info.id.hashCode().toLong())
+        val index = getAdapterPosition(project.info.id.getLongHash())
         LOG.verbose { "updateProjectView ${project.info.name}, index $index" }
         if (index == -1) {
             with(requireContext()) {
@@ -179,8 +176,6 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
             return
         }
         withContext(Dispatchers.Main) {
-            //this@updateProjectView.getAdapterItem(index)
-            //!!.notifyItemChanged(index)
             getAdapterItem(index).tryUpdateView()
             updateTitle(projects)
         }
@@ -189,7 +184,7 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
     private suspend fun notifyProjectRemoved(projectId: ProjectID, projectName: String) {
         withContext(Dispatchers.Main) {
             binding.recyclerViewProjectList.post {
-                itemAdapter?.removeByIdentifier(projectId.hashCode().toLong())
+                itemAdapter?.removeByIdentifier(projectId.getLongHash())
             }
             createSuccessPeek(translate {
                 Locale.ENGLISH { "Successfully removed project $projectName" }
@@ -369,7 +364,7 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
     }
 
     private fun ItemAdapter<ProjectListItem>.scrollTo(project: Project) {
-        val index = getAdapterPosition(project.info.id.hashCode().toLong())
+        val index = getAdapterPosition(project.info.id.getLongHash())
         if (index == -1) {
             with(requireContext()) {
                 LOG.warn(R.string.log_project_list_update_failure)
@@ -396,7 +391,7 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
         super.onResume()
         if (updatedProjects.isNotEmpty()) {
             for (project in updatedProjects) {
-                val index = itemAdapter?.getAdapterPosition(project.hashCode().toLong())
+                val index = itemAdapter?.getAdapterPosition(project.info.id.getLongHash())
                 if (index == -1) {
                     with(requireContext()) {
                         LOG.warn(R.string.log_project_list_update_failure)

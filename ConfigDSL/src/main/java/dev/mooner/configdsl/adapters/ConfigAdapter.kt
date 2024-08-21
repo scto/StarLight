@@ -32,7 +32,7 @@ class ConfigAdapter private constructor(
     private val configData  : MutableDataMap,
 ): DefaultLifecycleObserver {
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Default)
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     private var parentAdapter: ParentConfigAdapter? =
         ParentConfigAdapter(
@@ -72,7 +72,6 @@ class ConfigAdapter private constructor(
 
     override fun onDestroy(owner: LifecycleOwner) {
         destroy()
-        super.onDestroy(owner)
     }
 
     private fun checkDestroyed() =

@@ -68,6 +68,7 @@ class NotificationRulesActivity : AppCompatActivity() {
             structure(::getStructure)
             configData(wrapData(rules))
             onValueUpdated { _, id, value, jsonValue ->
+                @Suppress("UNCHECKED_CAST")
                 if (id == "rules")
                     rules = unwrapData(value as List<JsonObject>)
                 else
@@ -138,7 +139,7 @@ class NotificationRulesActivity : AppCompatActivity() {
                 toggle {
                     id = "auto_rule"
                     title = "규칙 자동 설정"
-                    description = "규칙을 실행 환경에 따라 자동으로 설정합니다. 실제 환경에 따라 올바르게 동작하지 않을 수 있습니다."
+                    description = "실행 환경에 따라 규칙을 자동으로 설정합니다."
                     defaultValue = true
                     icon = Icon.LAUNCH
                     iconTintColor = color { "#7EAA92" }
@@ -182,7 +183,6 @@ class NotificationRulesActivity : AppCompatActivity() {
                                 |10: 직장 프로필
                                 |11: 직장 프로필(샤오미)
                                 |95: 듀얼 메신저(삼성)
-                                |999: XSpace(샤오미)
                             """.trimMargin()
                             icon = Icon.ACCOUNT_BOX
                             iconTintColor = color { "#DEB6AB" }

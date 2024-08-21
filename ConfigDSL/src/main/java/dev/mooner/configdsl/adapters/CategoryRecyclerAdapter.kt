@@ -135,9 +135,6 @@ class CategoryRecyclerAdapter(
                 error("Malformed id: ${option.id}")
             option.init(eventPublisher)
         }
-        eventPublisher
-            .onEach(::println)
-            .launchIn(eventScope)
 
         eventPublisher
             .buffer()

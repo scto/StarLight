@@ -32,10 +32,8 @@ data class ChatRoomImpl(
         return try {
             val sendIntent = Intent()
             val msg = Bundle()
-            for (input in sendSession.remoteInputs) msg.putCharSequence(
-                input.resultKey,
-                message
-            )
+            for (input in sendSession.remoteInputs)
+                msg.putCharSequence(input.resultKey, message)
             NotificationListener.notifySent()
             RemoteInput.addResultsToIntent(sendSession.remoteInputs, sendIntent, msg)
             sendSession.actionIntent.send(context, 0, sendIntent)

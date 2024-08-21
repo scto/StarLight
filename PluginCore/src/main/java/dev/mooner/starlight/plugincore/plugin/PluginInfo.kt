@@ -44,5 +44,4 @@ data class PluginInfo(
             return json.decodeFromString(str)
         }
     }
-
 }

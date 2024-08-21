@@ -33,8 +33,8 @@ import dev.mooner.starlight.plugincore.config.GlobalConfig.getDefaultCategory
 import dev.mooner.starlight.plugincore.plugin.StarlightPlugin
 import dev.mooner.starlight.plugincore.utils.getStarLightDirectory
 import dev.mooner.starlight.utils.align.Align
+import dev.mooner.starlight.utils.createFailurePeek
 import dev.mooner.starlight.utils.createSimplePeek
-import dev.mooner.starlight.utils.createSuccessPeek
 import dev.mooner.starlight.utils.setCommonAttrs
 import jp.wasabeef.recyclerview.animators.FadeInUpAnimator
 import kotlinx.coroutines.Dispatchers
@@ -122,10 +122,10 @@ class PluginsFragment : Fragment(), OnClickListener {
 
     override fun onClick(view: View) {
         when(view) {
-            binding.alignPlugin -> showAlignDialog()
+            binding.alignPlugin  -> showAlignDialog()
             binding.loadFromFile -> showFileChooserDialog()
-            binding.pluginStore -> {
-                createSuccessPeek("아직 구현되지 않았어요 (◞‸◟；)", PeekAlert.Position.Bottom).peek()
+            binding.pluginStore  -> {
+                createFailurePeek("아직 구현되지 않았어요 (◞‸◟；)", PeekAlert.Position.Bottom).peek()
             }
             // TODO: Plugin store handler
         }

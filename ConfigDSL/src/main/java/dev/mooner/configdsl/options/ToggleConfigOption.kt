@@ -65,7 +65,7 @@ data class ToggleConfigOption(
 
     private fun onChecked(toggle: SwitchMaterial, isChecked: Boolean) {
         onValueChangedListener?.invoke(toggle, isChecked)
-        println(notifyUpdated(isChecked))
+        notifyUpdated(isChecked)
         notifyDependencyUpdated(isChecked)
     }
 

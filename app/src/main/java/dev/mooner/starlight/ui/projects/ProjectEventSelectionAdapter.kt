@@ -22,7 +22,8 @@ import dev.mooner.starlight.databinding.CardProjectEventSelectionBinding
 import dev.mooner.starlight.plugincore.Session
 import dev.mooner.starlight.plugincore.project.event.ProjectEvent
 import dev.mooner.starlight.plugincore.project.event.ProjectEventManager
-import dev.mooner.starlight.plugincore.utils.isNightMode
+import dev.mooner.starlight.plugincore.utils.color
+import dev.mooner.starlight.utils.dp
 import java.io.File
 
 class ProjectEventSelectionAdapter(
@@ -73,15 +74,16 @@ class ProjectEventSelectionAdapter(
                 data.isSelected = !data.isSelected
                 notifyItemChanged(position)
             }
-            cardWrapper.setCardBackgroundColor(
-                if (data.isSelected) {
-                    if (isNightMode(context))
-                        context.getColor(R.color.main_dark)
-                    else
-                        context.getColor(R.color.main_bright)
-                } else
-                    context.getColor(R.color.background_selection_card)
-            )
+
+            if (data.isSelected) {
+                cardWrapper.strokeWidth = dp(2)
+                cardWrapper.strokeColor = context.getColor(R.color.main_bright)
+                cardWrapper.setCardBackgroundColor(color { "#50AD977A" })
+            } else {
+                cardWrapper.strokeWidth = 0
+                cardWrapper.setCardBackgroundColor(context.getColor(R.color.background_selection_card))
+            }
+
             ivIcon.load(iconFile) {
                 scale(Scale.FIT)
                 val radius =

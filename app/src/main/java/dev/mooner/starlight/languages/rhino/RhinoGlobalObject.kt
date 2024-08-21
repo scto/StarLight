@@ -57,6 +57,8 @@ class RhinoGlobalObject(
                 withContext { context ->
                     val scope = this@RhinoGlobalObject
                     callback.call(context, scope, scope, emptyArray())
+                }?.also { e ->
+                    project.logger.error("Exception on interval $id: $e")
                 }
             }
         }.apply {
@@ -82,6 +84,8 @@ class RhinoGlobalObject(
             withContext { context ->
                 val scope = this@RhinoGlobalObject
                 callback.call(context, scope, scope, emptyArray())
+            }?.also { e ->
+                project.logger.error("Exception on timeout $id: $e")
             }
         }.apply {
             invokeOnCompletion {
@@ -110,10 +114,13 @@ class RhinoGlobalObject(
     private fun enterContext(): Context =
         (project.getLanguage() as JSRhino).enterContext()
 
-    private fun withContext(block: (context: Context) -> Unit) {
+    private fun withContext(block: (context: Context) -> Unit): Throwable? {
         val context = enterContext()
-        try {
+        return try {
             block(context)
+            null
+        } catch (e: Throwable) {
+            e
         } finally {
             Context.exit()
         }

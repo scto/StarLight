@@ -33,10 +33,15 @@ import dev.mooner.starlight.plugincore.event.Events
 import dev.mooner.starlight.plugincore.event.on
 import dev.mooner.starlight.plugincore.logger.LogType
 import dev.mooner.starlight.ui.logs.LogsRecyclerViewAdapter
+import io.noties.markwon.AbstractMarkwonPlugin
+import io.noties.markwon.Markwon
+import io.noties.markwon.MarkwonVisitor
 import jp.wasabeef.recyclerview.animators.FadeInUpAnimator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import org.commonmark.node.SoftLineBreak
+import java.io.Reader
 import kotlin.properties.Delegates.notNull
 
 typealias ConfirmCallback = (confirm: Boolean) -> Unit
@@ -128,6 +133,34 @@ fun Context.showErrorLogDialog(title: String, e: Throwable) {
         cancelOnTouchOutside(false)
         title(text = title)
         message(text = e.toString() + "\n" + e.stackTraceToString())
+        positiveButton(res = R.string.close, click = MaterialDialog::dismiss)
+    }
+}
+
+fun Context.showChangelogDialog(title: String) {
+    val changelog = this.assets
+        .open("changes.md")
+        .bufferedReader()
+        .use(Reader::readText)
+    val markdown = Markwon
+        .builder(this)
+        .usePlugin(
+            object : AbstractMarkwonPlugin() {
+                override fun configureVisitor(builder: MarkwonVisitor.Builder) {
+                    builder.on(SoftLineBreak::class.java) { visitor, _ ->
+                        visitor.forceNewLine()
+                    }
+                }
+            }
+        )
+        .build()
+        .toMarkdown(changelog)
+
+    MaterialDialog(this, BottomSheet(LayoutMode.WRAP_CONTENT)).noAutoDismiss().show {
+        setCommonAttrs()
+        cancelOnTouchOutside(false)
+        title(text = title)
+        message(text = markdown)
         positiveButton(res = R.string.close, click = MaterialDialog::dismiss)
     }
 }
@@ -225,6 +258,24 @@ fun Activity.createSuccessPeek(title: String, position: PeekAlert.Position): Pee
     }
 }
 
+fun Fragment.createFailurePeek(title: String, position: PeekAlert.Position): PeekAlert {
+    return createSimplePeek(text = title) {
+        this.position = position
+        iconRes = R.drawable.ic_round_close_24
+        iconTint(res = R.color.code_error)
+        backgroundColor(res = R.color.background_popup)
+    }
+}
+
+fun Activity.createFailurePeek(title: String, position: PeekAlert.Position): PeekAlert {
+    return createSimplePeek(text = title) {
+        this.position = position
+        iconRes = R.drawable.ic_round_close_24
+        iconTint(res = R.color.code_error)
+        backgroundColor(res = R.color.background_popup)
+    }
+}
+
 private fun PeekAlertBuilder.setup(context: Context, title: String?, text: String) {
     position = PeekAlert.Position.Top
     width = ViewGroup.LayoutParams.WRAP_CONTENT
@@ -240,16 +291,16 @@ private fun PeekAlertBuilder.setup(context: Context, title: String?, text: Strin
             typeface = getTypeface(context, R.font.nanumsquare_round_bold)
         }
     } else {
-        paddingDp = 17
-        text(text) {
+        //paddingDp = 17
+        title(title) {
             textColor(R.color.text)
-            textSize = 14f
-            typeface = getTypeface(context, R.font.wantedsans_medium)
+            textSize = 10f
+            typeface = getTypeface(context, R.font.nanumsquare_neo_regular)
         }
         text(text) {
             textColor(R.color.text)
             textSize = 12f
-            typeface = getTypeface(context, R.font.wantedsans_regular)
+            typeface = getTypeface(context, R.font.nanumsquare_neo_bold)
         }
     }
 }

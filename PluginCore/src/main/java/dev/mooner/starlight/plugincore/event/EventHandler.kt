@@ -40,7 +40,7 @@ inline fun <reified T: Event> EventHandler.on(
         scope.launch(event.coroutineContext) {
             runCatching {
                 callback(event)
-            }.onFailure { LOG.error(it) }
+            }.onFailure { LOG.error(it) { "Failed to handle event ${T::class.simpleName}" } }
         }
     }
     .launchIn(scope)

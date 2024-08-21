@@ -33,7 +33,6 @@ import dev.mooner.starlight.plugincore.logger.LoggerFactory
 import dev.mooner.starlight.plugincore.project.Project
 import dev.mooner.starlight.plugincore.translation.Locale
 import dev.mooner.starlight.plugincore.translation.translate
-import dev.mooner.starlight.plugincore.utils.color
 import dev.mooner.starlight.ui.debugroom.DebugRoomActivity
 import dev.mooner.starlight.ui.editor.DefaultEditorActivity
 import dev.mooner.starlight.ui.presets.ExpandableCard
@@ -85,11 +84,9 @@ class ProjectListItem(
                     collapse()
 
                 title = project.info.name
+                subTitle = project.getLanguage().name
 
-                if (context.layoutMode == LAYOUT_SLIM)
-                    setIconVisibility(View.GONE)
-                else
-                    setIcon(project)
+                setIcon(project)
 
                 setOnSwitchChangeListener { _, isChecked ->
                     if (project.info.isEnabled != isChecked) {
@@ -113,7 +110,7 @@ class ProjectListItem(
                 innerBinding = getInnerViewBinding(innerView)
 
                 for ((id, icon) in project.getCustomButtons()) {
-                    var buttonId = id.hashCode()
+                    var buttonId = View.generateViewId()
                     do {
                         buttonId++
                     } while (innerBinding?.flexLayout?.findViewById<View>(buttonId) != null)
@@ -236,21 +233,21 @@ class ProjectListItem(
             }
             .catch { e ->
                 val title = translate {
-                    Locale.ENGLISH { "Failed to compile ${project.info.name}\n$e" }
-                    Locale.KOREAN  { "${project.info.name} 컴파일 실패\n$e" }
+                    Locale.ENGLISH { "Failed to compile ${project.info.name}" }
+                    Locale.KOREAN  { "${project.info.name} 컴파일 실패" }
                 }
-                LOG.error(LogData.FLAG_COMPILE_RESULT) { title }
+                LOG.error(LogData.FLAG_COMPILE_RESULT) { title + "\n" + e.toString() }
                 withContext(Dispatchers.Main) {
                     (parent.get() ?: return@withContext).createSimplePeek(
-                        text = title
+                        title = title,
+                        text = e.toString()
                     ) {
-                        paddingDp = 16;
+                        paddingDp = 12
                         position = PeekAlert.Position.Bottom
                         iconRes = R.drawable.ic_round_error_outline_24
-                        iconTint(res = R.color.code_error)
-                        backgroundColor(res = R.color.background_popup)
+                        backgroundColor(res = R.color.code_error)
                         action("자세히") {
-                            textColor(value = color { "#4c4c4c" })
+                            textColor(res = R.color.black)
                             setOnActionListener {
                                 view.context.showErrorLogDialog(
                                     translate {
@@ -260,6 +257,9 @@ class ProjectListItem(
                                 )
                             }
                         }
+                    }.apply {
+                        setTitleColor(res = R.color.white)
+                        setTextColor(res = R.color.white)
                     }.peek()
                     binding?.updateState(project)
                 }
@@ -363,23 +363,11 @@ class ProjectListItem(
     private fun ExpandableCard.setIcon(project: Project) {
         val icon: Any? = when(project.getLanguage().id) {
             "JS_RHINO" -> R.drawable.ic_js
-            //"JS_V8" -> R.drawable.ic_v8
             else -> project.getLanguage().getIconFileOrNull()
         }
-        //val tint = if (icon == null) R.color.main_bright else null
         setIcon {
-            it.load(icon ?: R.drawable.ic_round_developer_mode_24) {
-                //transformations(RoundedCornersTransformation(context.resources.getDimension(R.dimen.lang_icon_corner_radius)))
-            }
+            it.load(icon ?: R.drawable.ic_round_developer_mode_24)
         }
-        /*
-        loadWithTint(
-            data = icon ?: R.drawable.ic_round_developer_mode_24,
-            tintColor = tint
-        ) {
-            transformations(RoundedCornersTransformation(context.resources.getDimension(R.dimen.lang_icon_corner_radius)))
-        }
-         */
     }
 
     private fun CardProjectsBinding.updateState(project: Project) {

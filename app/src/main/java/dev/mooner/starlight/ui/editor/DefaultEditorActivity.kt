@@ -190,7 +190,6 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
                 )
             }.commit()
         }
-        //setupHotKeys()
 
         configAdapter = ConfigAdapter.Builder(this) {
             bind(binding.bottomSheet.configRecyclerView)
@@ -532,7 +531,7 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
                     peek.hide()
                     delay(300L)
                     peek.apply {
-                        setPaddingDp(16)
+                        setPaddingDp(12)
                         setAutoHide(4000L)
                         setIcon(R.drawable.ic_round_error_outline_24)
                         setTitleColor(R.color.white)
@@ -540,12 +539,13 @@ class DefaultEditorActivity : CodeEditorActivity(), WebviewCallback {
                             Locale.ENGLISH { "Failed to compile [${project.info.name}]" }
                             Locale.ENGLISH { "[${project.info.name}] 컴파일 실패" }
                         })
-                        setTitleTypeface(getTypeface(this@DefaultEditorActivity, R.font.wantedsans_medium)!!)
+                        setTitleTypeface(getTypeface(this@DefaultEditorActivity, R.font.nanumsquare_neo_regular)!!)
+                        setTitleSize(10f)
                         setTextColor(R.color.white)
                         setText(e.toString())
-                        setTextTypeface(getTypeface(this@DefaultEditorActivity, R.font.wantedsans_regular)!!)
+                        setTextTypeface(getTypeface(this@DefaultEditorActivity, R.font.nanumsquare_neo_bold)!!)
                         setTextSize(12f)
-                        setAction("자세히", textColorRes = R.color.black) {
+                        setAction("자세히", textColorRes = R.color.text) {
                             binding.root.context.showErrorLogDialog(project.info.name + " 에러 로그", e)
                         }
                         setBackgroundColor(res = R.color.code_error)
