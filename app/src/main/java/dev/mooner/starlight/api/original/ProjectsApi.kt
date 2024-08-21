@@ -13,36 +13,43 @@ import dev.mooner.starlight.plugincore.api.InstanceType
 import dev.mooner.starlight.plugincore.project.Project
 
 @Suppress("unused")
-class ProjectManagerApi: Api<ProjectManagerApi.ProjectManager>() {
+class ProjectsApi: Api<ProjectsApi.Projects>() {
 
-    class ProjectManager(
+    class Projects(
         private val project: Project
     ) {
 
-        fun getProject(): Project = project
+        fun getSelf(): Project = project
 
-        fun getProject(name: String): Project? {
-            return Session.projectManager.getProject(name)
-        }
+        fun ofName(name: String): Project? =
+            Session.projectManager.getProjectByName(name)
+
+        fun ofId(id: String): Project? =
+            Session.projectManager.getProjectById(id)
     }
 
-    override val name: String = "ProjectManager"
+    override val name: String = "Projects"
 
     override val instanceType: InstanceType = InstanceType.OBJECT
 
-    override val instanceClass: Class<ProjectManager> = ProjectManager::class.java
+    override val instanceClass: Class<Projects> = Projects::class.java
 
     override val objects: List<ApiFunction> = listOf(
         function {
-            name = "getProject"
+            name = "getSelf"
             returns = Project::class.java
         },
         function {
-            name = "getProject"
+            name = "ofName"
+            args = arrayOf(String::class.java)
+            returns = Project::class.java
+        },
+        function {
+            name = "ofId"
             args = arrayOf(String::class.java)
             returns = Project::class.java
         }
     )
 
-    override fun getInstance(project: Project): Any = ProjectManager(project)
+    override fun getInstance(project: Project): Any = Projects(project)
 }

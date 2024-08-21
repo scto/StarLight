@@ -113,10 +113,10 @@ object ApplicationSession {
 
         Session.apiManager.apply {
             // Original Apis
-            addApi(LanguageManagerApi())
+            addApi(LanguagesApi())
             addApi(ProjectLoggerApi())
-            addApi(ProjectManagerApi())
-            addApi(PluginManagerApi())
+            addApi(ProjectsApi())
+            addApi(PluginsApi())
             //addApi(TimerApi())
             addApi(NotificationApi())
             addApi(EnvironmentApi())

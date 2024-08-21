@@ -45,7 +45,7 @@ class PlatformApi: Api<PlatformApi.Platform>() {
                     .versionName
 
             @JvmStatic
-            fun getUptimeMillis(): Long =
+            fun getUptime(): Long =
                 System.currentTimeMillis() - ApplicationSession.initMillis
         }
     }

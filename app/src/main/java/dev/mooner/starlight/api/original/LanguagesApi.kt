@@ -14,36 +14,36 @@ import dev.mooner.starlight.plugincore.language.Language
 import dev.mooner.starlight.plugincore.project.Project
 
 @Suppress("unused")
-class LanguageManagerApi: Api<LanguageManagerApi.LanguageManager>() {
+class LanguagesApi: Api<LanguagesApi.Languages>() {
 
-    class LanguageManager(
+    class Languages(
         private val project: Project
     ) {
-        fun getLanguage(): Language = project.getLanguage()
+        fun getSelf(): Language =
+            project.getLanguage()
 
-        fun getLanguage(id: String): Language? {
-            return Session.languageManager.getLanguage(id)
-        }
+        fun ofId(id: String): Language? =
+            Session.languageManager.getLanguage(id)
     }
 
-    override val name: String = "LanguageManager"
+    override val name: String = "Languages"
 
     override val instanceType: InstanceType = InstanceType.OBJECT
 
-    override val instanceClass: Class<LanguageManager> = LanguageManager::class.java
+    override val instanceClass: Class<Languages> = Languages::class.java
 
     override val objects: List<ApiFunction> = listOf(
         function {
-            name = "getLanguage"
+            name = "getSelf"
             returns = Language::class.java
         },
         function {
-            name = "getLanguage"
+            name = "ofId"
             args = arrayOf(String::class.java)
             returns = Language::class.java
         }
     )
 
     override fun getInstance(project: Project): Any =
-        LanguageManager(project)
+        Languages(project)
 }

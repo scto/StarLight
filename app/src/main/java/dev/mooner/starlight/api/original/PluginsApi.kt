@@ -14,44 +14,43 @@ import dev.mooner.starlight.plugincore.plugin.StarlightPlugin
 import dev.mooner.starlight.plugincore.project.Project
 
 @Suppress("unused")
-class PluginManagerApi: Api<PluginManagerApi.PluginManager>() {
+class PluginsApi: Api<PluginsApi.Plugins>() {
 
-    class PluginManager {
-        fun getPluginById(id: String): StarlightPlugin? {
+    class Plugins {
+        fun ofId(id: String): StarlightPlugin? {
             return Session.pluginManager.getPluginById(id)
         }
 
-        fun getPluginByName(name: String): StarlightPlugin? {
+        fun ofName(name: String): StarlightPlugin? {
             return Session.pluginManager.getPluginByName(name)
         }
 
-        fun getPlugins(): List<StarlightPlugin> {
-            return Session.pluginManager.plugins.toList()
-        }
+        fun getAll(): List<StarlightPlugin> =
+            Session.pluginManager.plugins.toList()
     }
 
-    override val name: String = "PluginManager"
+    override val name: String = "Plugins"
 
     override val instanceType: InstanceType = InstanceType.OBJECT
 
-    override val instanceClass: Class<PluginManager> = PluginManager::class.java
+    override val instanceClass: Class<Plugins> = Plugins::class.java
 
     override val objects: List<ApiFunction> = listOf(
         function {
-            name = "getPluginById"
+            name = "ofId"
             args = arrayOf(String::class.java)
             returns = StarlightPlugin::class.java
         },
         function {
-            name = "getPluginByName"
+            name = "ofName"
             args = arrayOf(String::class.java)
             returns = StarlightPlugin::class.java
         },
         function {
-            name = "getPlugins"
+            name = "getAll"
             returns = List::class.java
         }
     )
 
-    override fun getInstance(project: Project): Any = PluginManager()
+    override fun getInstance(project: Project): Any = Plugins()
 }
