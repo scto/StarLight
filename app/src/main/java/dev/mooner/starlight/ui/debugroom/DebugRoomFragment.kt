@@ -153,7 +153,7 @@ class DebugRoomFragment: Fragment() {
 
         binding.roomTitle.text = if (roomName == "undefined") projectName else roomName
 
-        project = Session.projectManager.getProject(projectName) ?: let {
+        project = Session.projectManager.getProjectByName(projectName) ?: let {
             Toast.makeText(activity, "프로젝트 '${projectName}'을 찾을 수 없어요 :(", Toast.LENGTH_LONG).show()
             return binding.root
         }

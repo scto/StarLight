@@ -13,6 +13,7 @@ import dev.mooner.starlight.plugincore.project.event.ProjectEvent
 import dev.mooner.starlight.plugincore.project.event.ProjectEventManager
 import dev.mooner.starlight.plugincore.project.event.getInstance
 import java.io.File
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
@@ -32,7 +33,7 @@ class ProjectManager(
     }
 
     @JvmOverloads
-    fun getProject(name: String, ignoreCase: Boolean = false): Project? {
+    fun getProjectByName(name: String, ignoreCase: Boolean = false): Project? {
         return if (ignoreCase) {
             projects.keys
                 .find { it.lowercase() == name.lowercase() }
@@ -42,8 +43,13 @@ class ProjectManager(
         }
     }
 
+    fun getProjectById(id: String): Project? {
+        val uuid = UUID.fromString(id)
+        return projects.values.find { it.info.id == uuid }
+    }
+
     fun updateProjectInfo(name: String, callListener: Boolean = false, block: ProjectInfo.() -> Unit) {
-        val project = projects[name]?: throw IllegalArgumentException("Cannot find project [$name]")
+        val project = projects[name] ?: throw IllegalArgumentException("Cannot find project [$name]")
         project.info.block()
         project.saveInfo()
         if (callListener)

@@ -31,7 +31,7 @@ abstract class CodeEditorActivity: AppCompatActivity() {
         val projectName = intent.getStringExtra(KEY_PROJECT_NAME)
 
         if (!projectName.isNullOrBlank()) {
-            mProject = Session.projectManager.getProject(projectName)
+            mProject = Session.projectManager.getProjectByName(projectName)
                 ?: error("Failed to find project with name '$projectName'")
         }
     }

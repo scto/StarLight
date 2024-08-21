@@ -45,7 +45,7 @@ class BotManagerApi: Api<BotManagerApi.BotManager>() {
 
         fun getBot(botName: String): Bot? =
             Session.projectManager
-                .getProject(botName)
+                .getProjectByName(botName)
                 ?.let(Bot::fromProject)
 
         @JvmOverloads

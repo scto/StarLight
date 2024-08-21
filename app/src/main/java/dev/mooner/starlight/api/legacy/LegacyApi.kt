@@ -78,7 +78,7 @@ class LegacyApi: Api<LegacyApi.Api>() {
             val mProject = if (scriptName == project.info.name)
                 project
             else
-                projectManager.getProject(scriptName)?: return false
+                projectManager.getProjectByName(scriptName)?: return false
             return mProject.compile(throwException = throwOnError)
         }
 
@@ -91,7 +91,7 @@ class LegacyApi: Api<LegacyApi.Api>() {
             reload(scriptName, throwOnError)
 
         fun prepare(scriptName: String): Int {
-            val project = projectManager.getProject(scriptName)
+            val project = projectManager.getProjectByName(scriptName)
                 ?: return STATE_PROJECT_NOT_FOUND
             if (project.isCompiled)
                 return STATE_ALREADY_COMPILED
@@ -100,7 +100,7 @@ class LegacyApi: Api<LegacyApi.Api>() {
         }
 
         fun unload(scriptName: String): Boolean {
-            val project = projectManager.getProject(scriptName)
+            val project = projectManager.getProjectByName(scriptName)
                 ?: return false
             if (!project.isCompiled)
                 return false
@@ -115,7 +115,7 @@ class LegacyApi: Api<LegacyApi.Api>() {
         }
 
         fun off(scriptName: String): Boolean {
-            val project = projectManager.getProject(scriptName)
+            val project = projectManager.getProjectByName(scriptName)
                 ?: return false
             project.setEnabled(false)
             return true
@@ -128,20 +128,20 @@ class LegacyApi: Api<LegacyApi.Api>() {
         }
 
         fun on(scriptName: String): Boolean {
-            val project = projectManager.getProject(scriptName)
+            val project = projectManager.getProjectByName(scriptName)
                 ?: return false
             project.setEnabled(true)
             return true
         }
 
         fun isOn(scriptName: String): Boolean {
-            val project = projectManager.getProject(scriptName)
+            val project = projectManager.getProjectByName(scriptName)
                 ?: return false
             return project.info.isEnabled
         }
 
         fun isCompiled(scriptName: String): Boolean {
-            val project = projectManager.getProject(scriptName)
+            val project = projectManager.getProjectByName(scriptName)
                 ?: return false
             return project.isCompiled
         }
@@ -241,7 +241,7 @@ class LegacyApi: Api<LegacyApi.Api>() {
         }
 
         fun getActiveThreadsCount(scriptName: String): Int {
-            val project = projectManager.getProject(scriptName)
+            val project = projectManager.getProjectByName(scriptName)
                 ?: return 0
             return project.activeJobs()
         }
@@ -251,7 +251,7 @@ class LegacyApi: Api<LegacyApi.Api>() {
         }
 
         fun interruptThreads(scriptName: String): Boolean {
-            val project = projectManager.getProject(scriptName)
+            val project = projectManager.getProjectByName(scriptName)
                 ?: return false
             project.stopAllJobs()
             return true
@@ -262,7 +262,7 @@ class LegacyApi: Api<LegacyApi.Api>() {
         }
 
         fun isTerminated(scriptName: String): Boolean {
-            val project = projectManager.getProject(scriptName)
+            val project = projectManager.getProjectByName(scriptName)
                 ?: return false
             return project.activeJobs() == 0
         }

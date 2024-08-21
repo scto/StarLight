@@ -6,15 +6,12 @@
 
 package dev.mooner.starlight.ui.projects.config
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
 import coil.load
 import com.afollestad.materialdialogs.LayoutMode
 import com.afollestad.materialdialogs.MaterialDialog
@@ -32,7 +29,6 @@ import dev.mooner.starlight.R
 import dev.mooner.starlight.databinding.ActivityProjectConfigBinding
 import dev.mooner.starlight.databinding.CardSimpleListItemBinding
 import dev.mooner.starlight.logging.bindLogNotifier
-import dev.mooner.starlight.plugincore.Session
 import dev.mooner.starlight.plugincore.Session.json
 import dev.mooner.starlight.plugincore.Session.projectManager
 import dev.mooner.starlight.plugincore.config.*
@@ -46,7 +42,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
-import java.io.File
 import kotlin.properties.Delegates.notNull
 
 class ProjectConfigActivity: AppCompatActivity() {
@@ -68,7 +63,7 @@ class ProjectConfigActivity: AppCompatActivity() {
         val fabProjectConfig = binding.fabProjectConfig
 
         val projectName = intent.getStringExtra("projectName")!!
-        project = projectManager.getProject(projectName)
+        project = projectManager.getProjectByName(projectName)
             ?: throw IllegalStateException("Unable to find project $projectName")
 
         projectButtonIDs = project
@@ -455,7 +450,7 @@ class ProjectConfigActivity: AppCompatActivity() {
                                             Locale.KOREAN  { "올바르지 않은 이름 형식이에요" }
                                         }
                                     }
-                                    if (projectManager.getProject(v, ignoreCase = true) != null) {
+                                    if (projectManager.getProjectByName(v, ignoreCase = true) != null) {
                                         name = null
                                         return@lambda translate {
                                             Locale.ENGLISH { "Name shadowed" }
@@ -506,13 +501,6 @@ class ProjectConfigActivity: AppCompatActivity() {
                 dismiss()
             }
         }
-    }
-
-    private fun openFolderInExplorer(context: Context, file: File) {
-        val intent = Intent(Intent.ACTION_VIEW)
-        val uri = FileProvider.getUriForFile(context, "$packageName.provider", file)
-        intent.setDataAndType(uri, "*/*")
-        startActivity(Intent.createChooser(intent, "폴더 열기"))
     }
 }
 

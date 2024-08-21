@@ -284,7 +284,7 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
 
             positiveButton(res = R.string.create) {
                 val projectName = nameEditText.text.toString()
-                if (projectManager.getProject(projectName, ignoreCase = true) != null) {
+                if (projectManager.getProjectByName(projectName, ignoreCase = true) != null) {
                     nameEditText.error = getString(R.string.project_duplicate_name)
                     nameEditText.requestFocus()
                     return@positiveButton
