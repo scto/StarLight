@@ -138,9 +138,9 @@ class CategoryRecyclerAdapter(
 
         eventPublisher
             .buffer()
-            .filter { it.provider.startsWith("redraw:") }
+            .filterIsInstance<ConfigOption.RedrawRequestData>()
             .onEach { event ->
-                val originId = event.provider.drop("redraw:".length)
+                val originId = event.provider
                 val index = options.indexOfFirst { it.id == originId }
                 if (index == -1)
                     return@onEach
