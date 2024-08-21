@@ -67,7 +67,7 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
 
     private val updatedProjects: MutableSet<Project> = hashSetOf()
 
-    private lateinit var projects: List<Project>
+    private lateinit var projects: MutableList<Project>
     private var itemAdapter: ItemAdapter<ProjectListItem>? = null
 
     private val aligns = arrayOf(
@@ -94,7 +94,7 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
         itemAdapter = ItemAdapter()
         val fastAdapter = FastAdapter.with(itemAdapter!!)
 
-        projects = projectManager.getProjects()
+        projects = projectManager.getProjects().toMutableList()
 
         binding.apply {
             binding.alignProject.text = getString(R.string.aligned_by)
@@ -186,6 +186,7 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
             binding.recyclerViewProjectList.post {
                 itemAdapter?.removeByIdentifier(projectId.getLongHash())
             }
+            projects.removeIf { it.info.id == projectId }
             createSuccessPeek(translate {
                 Locale.ENGLISH { "Successfully removed project $projectName" }
                 Locale.KOREAN  { "프로젝트 $projectName 삭제 완료" }
@@ -194,7 +195,7 @@ class ProjectsFragment : Fragment(), View.OnClickListener {
     }
 
     private suspend fun notifyProjectAdded(project: Project) {
-        projects = projectManager.getProjects()
+        projects = projectManager.getProjects().toMutableList()
         val weakRef = WeakReference<Fragment>(this)
         withContext(Dispatchers.Main) {
             updateEmptyText()
